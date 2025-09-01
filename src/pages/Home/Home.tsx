@@ -177,7 +177,7 @@ const Home: React.FC = () => {
       </div>
 
       {/* Module Cards */}
-      <div className="max-w-md mx-auto px-3 sm:px-4 -mt-3 sm:-mt-4">
+      <div className="max-w-md lg:max-w-6xl mx-auto px-3 sm:px-4 lg:px-6 -mt-3 sm:-mt-4">
         <div className="responsive-grid-2 mb-6 sm:mb-8">
           {moduleCards.map((card, index) => (
             <div 

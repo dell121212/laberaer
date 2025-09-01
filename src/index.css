@@ -8,13 +8,18 @@
   }
   
   body {
-    @apply font-sans text-secondary-800 dark:text-secondary-200 bg-gradient-to-br from-secondary-50 to-primary-50 dark:from-secondary-900 dark:to-secondary-800;
+    @apply font-sans text-secondary-800 dark:text-secondary-200;
+    background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 50%, #cbd5e1 100%);
     min-height: 100vh;
     /* 防止移动端缩放 */
     -webkit-text-size-adjust: 100%;
     -ms-text-size-adjust: 100%;
     /* 优化触摸滚动 */
     -webkit-overflow-scrolling: touch;
+  }
+  
+  body.dark {
+    background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #334155 100%);
   }
   
   html {
@@ -47,36 +52,36 @@
 
 @layer components {
   .modern-card {
-    @apply bg-white/95 dark:bg-secondary-800/95 rounded-2xl shadow-soft border border-secondary-100/50 dark:border-secondary-700/50 backdrop-blur-md
-           p-4 sm:p-5 md:p-6;
+    @apply bg-white/95 dark:bg-secondary-800/95 rounded-xl lg:rounded-2xl shadow-soft border border-secondary-100/50 dark:border-secondary-700/50 backdrop-blur-md
+           p-3 sm:p-4 md:p-5 lg:p-6;
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   }
   
   .modern-card:hover {
     @apply shadow-large border-primary-200/50 dark:border-primary-600/50;
-    transform: translateY(-2px) scale(1.01);
+    transform: translateY(-1px) scale(1.005);
   }
   
-  /* 移动端卡片优化 */
-  @media (max-width: 768px) {
+  /* 桌面端卡片优化 */
+  @media (min-width: 1024px) {
     .modern-card {
-      @apply rounded-xl p-3;
+      @apply rounded-2xl p-6;
     }
     
     .modern-card:hover {
-      transform: translateY(-1px) scale(1.005);
+      transform: translateY(-2px) scale(1.01);
     }
   }
   }
   
   .btn-primary {
-    @apply px-4 py-2.5 sm:px-6 sm:py-3 rounded-xl font-medium transition-all duration-300 
+    @apply px-4 py-2.5 sm:px-6 sm:py-3 lg:px-8 lg:py-4 rounded-xl font-medium transition-all duration-300 
            bg-gradient-to-r from-primary-600 to-primary-700 text-white 
            hover:from-primary-700 hover:to-primary-800 dark:from-primary-700 dark:to-primary-800
            dark:hover:from-primary-800 dark:hover:to-primary-900 active:scale-95
            shadow-soft hover:shadow-large focus:ring-4 focus:ring-primary-200 dark:focus:ring-primary-800
            border border-primary-500/20 hover:border-primary-400/30
-           text-sm sm:text-base min-h-[44px] touch-manipulation;
+           text-sm sm:text-base lg:text-lg min-h-[44px] lg:min-h-[48px] touch-manipulation;
   }
   
   /* 移动端按钮优化 */
@@ -104,13 +109,13 @@
   }
   
   .modern-input {
-    @apply w-full px-3 py-2.5 sm:px-4 sm:py-3 rounded-xl border border-secondary-200/50 
+    @apply w-full px-3 py-2.5 sm:px-4 sm:py-3 lg:px-5 lg:py-4 rounded-xl border border-secondary-200/50 
            dark:border-secondary-700/50 bg-white/80 dark:bg-secondary-800/80 backdrop-blur-sm 
            text-secondary-800 dark:text-secondary-200 placeholder-secondary-400 dark:placeholder-secondary-500
            focus:outline-none focus:ring-2 focus:ring-primary-500/50 dark:focus:ring-primary-400/50 
            focus:border-primary-300 dark:focus:border-primary-600
            focus:bg-white dark:focus:bg-secondary-800 transition-all duration-300 shadow-sm focus:shadow-medium
-           text-sm sm:text-base min-h-[44px] touch-manipulation;
+           text-sm sm:text-base lg:text-lg min-h-[44px] lg:min-h-[48px] touch-manipulation;
   }
   
   /* 移动端输入框优化 */
@@ -222,11 +227,11 @@
   
   /* 响应式网格系统 */
   .responsive-grid {
-    @apply grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4 lg:gap-6;
+    @apply grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-3 sm:gap-4 lg:gap-6;
   }
   
   .responsive-grid-2 {
-    @apply grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2 sm:gap-3 lg:gap-4;
+    @apply grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-2 sm:gap-3 lg:gap-4;
   }
   
   /* 响应式间距 */

@@ -10,15 +10,14 @@ const BottomNavigation: React.FC = () => {
 
   const navItems = [
     { path: '/lab', icon: Home, label: '实验室' },
-    { path: '/strains', icon: Beaker, label: '菌种保藏' },
-    { path: '/members', icon: Users, label: '成员名单' },
-    { path: '/duty', icon: Calendar, label: '值日' },
-    { path: '/media', icon: FlaskConical, label: '培养基' },
+    { path: '/profile', icon: Users, label: '我的' },
+    { path: '/settings', icon: Calendar, label: '设置' },
   ];
 
-  // 只有管理员可以看到操作记录
+  // 只有管理员可以看到操作记录和管理面板
   if (user?.role === 'admin') {
     navItems.push({ path: '/logs', icon: Activity, label: '操作记录' });
+    navItems.push({ path: '/admin', icon: Shield, label: '管理' });
   }
   return (
     <nav className="fixed bottom-0 left-0 right-0 bg-white/95 dark:bg-secondary-900/95 backdrop-blur-xl 

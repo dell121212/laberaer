@@ -242,6 +242,13 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
     const newMedium: Medium = {
       ...medium,
       id: Date.now().toString(),
+      type: medium.type || 'solid',
+      cultivationParams: medium.cultivationParams || {
+        temperature: '',
+        time: '',
+        ph: '',
+        other: ''
+      },
       createdAt: new Date(),
       updatedAt: new Date()
     };

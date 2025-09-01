@@ -21,6 +21,12 @@ export interface Strain {
   addedBy: string;
   addedAt: Date;
   updatedAt: Date;
+  transferReminder?: {
+    enabled: boolean;
+    intervalDays: number;
+    lastTransferDate?: Date;
+    nextReminderDate?: Date;
+  };
 }
 
 export interface Member {
@@ -50,8 +56,15 @@ export interface DutySchedule {
 export interface Medium {
   id: string;
   name: string;
+  type: 'liquid' | 'solid';
   suitableStrains: string[];
   formula: string;
+  cultivationParams: {
+    temperature: string;
+    time: string;
+    ph?: string;
+    other?: string;
+  };
   recommendedBy: string;
   createdAt: Date;
   updatedAt: Date;

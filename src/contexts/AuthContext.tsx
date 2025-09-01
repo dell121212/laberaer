@@ -83,7 +83,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       username,
       email,
       password,
-      role: users.length === 0 ? 'admin' : 'member', // 第一个用户为管理员
+      role: 'member', // 所有新用户默认为普通成员
       createdAt: new Date()
     };
 

@@ -22,7 +22,13 @@ const StrainForm: React.FC<StrainFormProps> = ({ strain, onClose }) => {
     preservationTemperature: '',
     location: '',
     description: '',
-    addedBy: user?.username || ''
+    addedBy: user?.username || '',
+    transferReminder: {
+      enabled: false,
+      intervalDays: 30,
+      lastTransferDate: undefined,
+      nextReminderDate: undefined
+    }
   });
 
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -120,6 +126,52 @@ const StrainForm: React.FC<StrainFormProps> = ({ strain, onClose }) => {
               >
                 <X className="w-5 h-5" />
               </button>
+            </div>
+          </div>
+
+          <div className="md:col-span-2">
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              转接提醒设置
+            </label>
+            <div className="space-y-3 p-4 bg-gray-50 rounded-lg">
+              <label className="flex items-center gap-2">
+                <input
+                  type="checkbox"
+                  checked={formData.transferReminder.enabled}
+                  onChange={(e) => setFormData(prev => ({
+                    ...prev,
+                    transferReminder: {
+                      ...prev.transferReminder,
+                      enabled: e.target.checked
+                    }
+                  }))}
+                  className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                />
+                <span className="text-sm text-gray-700">启用转接提醒</span>
+              </label>
+              
+              {formData.transferReminder.enabled && (
+                <div>
+                  <label className="block text-sm text-gray-600 mb-1">
+                    提醒间隔（天）
+                  </label>
+                  <input
+                    type="number"
+                    min="1"
+                    max="365"
+                    value={formData.transferReminder.intervalDays}
+                    onChange={(e) => setFormData(prev => ({
+                      ...prev,
+                      transferReminder: {
+                        ...prev.transferReminder,
+                        intervalDays: parseInt(e.target.value) || 30
+                      }
+                    }))}
+                    className="modern-input"
+                    placeholder="30"
+                  />
+                </div>
+              )}
             </div>
           </div>
         </div>

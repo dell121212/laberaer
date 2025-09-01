@@ -13,6 +13,8 @@ import MediaList from './pages/Media/MediaList.tsx';
 import ThesesList from './pages/Theses/ThesesList.tsx';
 import ActivityLogs from './pages/Logs/ActivityLogs.tsx';
 import AdminPanel from './pages/Admin/AdminPanel.tsx';
+import UserProfile from './pages/Profile/UserProfile.tsx';
+import Settings from './pages/Settings/Settings.tsx';
 
 const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { user } = useAuth();
@@ -71,6 +73,22 @@ const AppContent: React.FC = () => {
           element={
             <ProtectedRoute>
               <ThesesList />
+            </ProtectedRoute>
+          } 
+        />
+        <Route 
+          path="/profile" 
+          element={
+            <ProtectedRoute>
+              <UserProfile />
+            </ProtectedRoute>
+          } 
+        />
+        <Route 
+          path="/settings" 
+          element={
+            <ProtectedRoute>
+              <Settings />
             </ProtectedRoute>
           } 
         />

@@ -14,8 +14,15 @@ const MediumForm: React.FC<MediumFormProps> = ({ medium, onClose }) => {
   const { user } = useAuth();
   const [formData, setFormData] = useState({
     name: '',
+    type: 'solid' as 'liquid' | 'solid',
     suitableStrains: [] as string[],
     formula: '',
+    cultivationParams: {
+      temperature: '',
+      time: '',
+      ph: '',
+      other: ''
+    },
     recommendedBy: user?.username || ''
   });
 
@@ -23,8 +30,15 @@ const MediumForm: React.FC<MediumFormProps> = ({ medium, onClose }) => {
     if (medium) {
       setFormData({
         name: medium.name,
+        type: medium.type || 'solid',
         suitableStrains: medium.suitableStrains,
         formula: medium.formula,
+        cultivationParams: medium.cultivationParams || {
+          temperature: '',
+          time: '',
+          ph: '',
+          other: ''
+        },
         recommendedBy: medium.recommendedBy
       });
     }
@@ -120,6 +134,66 @@ const MediumForm: React.FC<MediumFormProps> = ({ medium, onClose }) => {
             placeholder="请详细描述培养基的配方和制备方法..."
             required
           />
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-secondary-700 mb-2">
+            培养参数
+          </label>
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className="block text-xs text-secondary-600 mb-1">温度</label>
+              <input
+                type="text"
+                value={formData.cultivationParams.temperature}
+                onChange={(e) => setFormData(prev => ({
+                  ...prev,
+                  cultivationParams: { ...prev.cultivationParams, temperature: e.target.value }
+                }))}
+                className="modern-input"
+                placeholder="如：25-28°C"
+              />
+            </div>
+            <div>
+              <label className="block text-xs text-secondary-600 mb-1">培养时间</label>
+              <input
+                type="text"
+                value={formData.cultivationParams.time}
+                onChange={(e) => setFormData(prev => ({
+                  ...prev,
+                  cultivationParams: { ...prev.cultivationParams, time: e.target.value }
+                }))}
+                className="modern-input"
+                placeholder="如：7-10天"
+              />
+            </div>
+            <div>
+              <label className="block text-xs text-secondary-600 mb-1">pH值</label>
+              <input
+                type="text"
+                value={formData.cultivationParams.ph}
+                onChange={(e) => setFormData(prev => ({
+                  ...prev,
+                  cultivationParams: { ...prev.cultivationParams, ph: e.target.value }
+                }))}
+                className="modern-input"
+                placeholder="如：6.0-7.0"
+              />
+            </div>
+            <div>
+              <label className="block text-xs text-secondary-600 mb-1">其他参数</label>
+              <input
+                type="text"
+                value={formData.cultivationParams.other}
+                onChange={(e) => setFormData(prev => ({
+                  ...prev,
+                  cultivationParams: { ...prev.cultivationParams, other: e.target.value }
+                }))}
+                className="modern-input"
+                placeholder="湿度、光照等"
+              />
+            </div>
+          </div>
         </div>
 
         <div>

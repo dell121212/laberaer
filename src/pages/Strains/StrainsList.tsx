@@ -1,21 +1,44 @@
 import React, { useState } from 'react';
 import { useApp } from '../../contexts/AppContext';
+import { useAuth } from '../../contexts/AuthContext';
 import SearchBar from '../../components/Common/SearchBar';
 import FloatingActionButton from '../../components/Common/FloatingActionButton';
 import ImportExportButtons from '../../components/Common/ImportExportButtons';
 import StrainForm from './StrainForm';
 import StrainDetail from './StrainDetail';
-import { Beaker, Filter, Download, Upload } from 'lucide-react';
+import { Beaker, Filter, Download, Upload, AlertTriangle } from 'lucide-react';
 import { format } from 'date-fns';
 
 const StrainsList: React.FC = () => {
   const { strains } = useApp();
+  const { user } = useAuth();
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedType, setSelectedType] = useState('');
   const [showForm, setShowForm] = useState(false);
   const [editingStrain, setEditingStrain] = useState(null);
   const [selectedStrain, setSelectedStrain] = useState(null);
   const [showFilters, setShowFilters] = useState(false);
+  const [showReminders, setShowReminders] = useState(false);
+
+  // 检查需要转接提醒的菌种
+  const strainsNeedingReminder = strains.filter(strain => {
+    if (!strain.transferReminder?.enabled) return false;
+    
+    const now = new Date();
+    const lastTransfer = strain.transferReminder.lastTransferDate 
+      ? new Date(strain.transferReminder.lastTransferDate)
+      : new Date(strain.addedAt);
+    
+    const daysSinceLastTransfer = Math.floor((now.getTime() - lastTransfer.getTime()) / (1000 * 60 * 60 * 24));
+    return daysSinceLastTransfer >= strain.transferReminder.intervalDays;
+  });
+
+  // 显示提醒弹窗
+  React.useEffect(() => {
+    if (strainsNeedingReminder.length > 0) {
+      setShowReminders(true);
+    }
+  }, [strainsNeedingReminder.length]);
 
   const strainTypes = [...new Set(strains.map(strain => strain.type))];
 
@@ -175,6 +198,53 @@ const StrainsList: React.FC = () => {
           onClose={() => setSelectedStrain(null)}
           onEdit={handleEditStrain}
         />
+      )}
+
+      {/* Transfer Reminder Modal */}
+      {showReminders && strainsNeedingReminder.length > 0 && (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+          <div className="bg-white dark:bg-secondary-800 rounded-2xl shadow-2xl w-full max-w-md max-h-[80vh] overflow-hidden">
+            <div className="bg-gradient-to-r from-warning-500 to-warning-600 p-6 text-white">
+              <div className="flex items-center gap-3">
+                <AlertTriangle size={24} />
+                <h2 className="text-xl font-bold">转接提醒</h2>
+              </div>
+            </div>
+            <div className="p-6 max-h-[60vh] overflow-y-auto">
+              <p className="text-secondary-700 dark:text-secondary-300 mb-4">
+                以下菌种需要进行转接操作：
+              </p>
+              <div className="space-y-3">
+                {strainsNeedingReminder.map(strain => {
+                  const lastTransfer = strain.transferReminder?.lastTransferDate 
+                    ? new Date(strain.transferReminder.lastTransferDate)
+                    : new Date(strain.addedAt);
+                  const daysSince = Math.floor((new Date().getTime() - lastTransfer.getTime()) / (1000 * 60 * 60 * 24));
+                  
+                  return (
+                    <div key={strain.id} className="p-3 bg-warning-50 dark:bg-warning-900/20 rounded-lg border border-warning-200 dark:border-warning-700">
+                      <h3 className="font-medium text-secondary-900 dark:text-secondary-100">{strain.name}</h3>
+                      <p className="text-sm text-secondary-600 dark:text-secondary-400">
+                        距离上次转接已过 {daysSince} 天
+                      </p>
+                      <p className="text-xs text-warning-600 dark:text-warning-400">
+                        建议间隔：{strain.transferReminder?.intervalDays} 天
+                      </p>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+            <div className="p-6 border-t border-secondary-200 dark:border-secondary-700">
+              <button
+                onClick={() => setShowReminders(false)}
+                className="w-full btn-primary"
+              >
+                我知道了
+              </button>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );

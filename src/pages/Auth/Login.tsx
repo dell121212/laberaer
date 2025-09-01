@@ -79,14 +79,26 @@ const Login: React.FC = () => {
         <div className="absolute top-1/2 left-1/2 w-60 h-60 bg-gradient-to-r from-purple-100 to-pink-100 rounded-full mix-blend-multiply filter blur-2xl opacity-50 animate-float" style={{ animationDelay: '4s' }}></div>
       </div>
       
-      <div className="modern-card w-full max-w-md p-8 animate-bounce-in relative z-10 shadow-2xl">
-        <div className="text-center mb-8">
-          <div className="w-20 h-20 bg-gradient-to-r from-primary-600 via-primary-700 to-purple-600 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-large pulse-glow">
-            <LogIn className="text-white animate-pulse" size={36} />
+      <div className="modern-card w-full max-w-md lg:max-w-lg p-6 lg:p-8 animate-bounce-in relative z-10 shadow-2xl">
+        {/* 实验室宣传图 */}
+        <div className="text-center mb-6 lg:mb-8">
+          <div className="w-24 h-24 lg:w-32 lg:h-32 mx-auto mb-4 relative">
+            <img 
+              src="https://images.pexels.com/photos/2280549/pexels-photo-2280549.jpeg?auto=compress&cs=tinysrgb&w=400" 
+              alt="实验室"
+              className="w-full h-full object-cover rounded-2xl shadow-lg"
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-primary-600/20 to-transparent rounded-2xl"></div>
           </div>
-          <h1 className="text-3xl font-bold gradient-text mb-2 animate-slide-in-left">🏫 韶关学院</h1>
-          <h2 className="text-xl font-semibold text-secondary-800 mb-2 animate-slide-in-right">🍄 食用菌创新团队</h2>
-          <p className="text-secondary-600">🔬 科研创新 · 🤝 团队协作 · 📚 知识传承</p>
+          <h1 className="text-2xl lg:text-3xl font-bold gradient-text mb-2 animate-slide-in-left">🏫 韶关学院</h1>
+          <h2 className="text-lg lg:text-xl font-semibold text-secondary-800 mb-2 animate-slide-in-right">🍄 食用菌创新团队</h2>
+          <p className="text-sm lg:text-base text-secondary-600">🔬 科研创新 · 🤝 团队协作 · 📚 知识传承</p>
+        </div>
+
+        <div className="text-center mb-8">
+          <h3 className="text-lg lg:text-xl font-semibold text-secondary-800 mb-2">
+            {isLogin ? '登录系统' : '注册账号'}
+          </h3>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-4">
