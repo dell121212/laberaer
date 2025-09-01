@@ -24,10 +24,12 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     const users = JSON.parse(localStorage.getItem('users') || '[]');
     const foundUser = users.find((u: User) => u.username === username && u.password === password);
     
-    if (foundUser) {
+    if (foundUser && !foundUser.isBlocked) {
       setUser(foundUser);
       localStorage.setItem('currentUser', JSON.stringify(foundUser));
       return true;
+    } else if (foundUser && foundUser.isBlocked) {
+      throw new Error('账户已被限制登录，请联系管理员');
     }
     return false;
   };

@@ -84,8 +84,15 @@ export const downloadTemplate = (type: string) => {
     case 'media':
       templateData = [{
         name: 'PDA培养基',
+        type: '固体发酵',
         suitableStrains: '平菇,香菇,金针菇',
         formula: '马铃薯200g，葡萄糖20g，琼脂15g，蒸馏水1000ml',
+        cultivationParams: {
+          temperature: '25-28°C',
+          time: '7-10天',
+          ph: '6.0-7.0',
+          other: '相对湿度85-90%'
+        },
         recommendedBy: '李老师'
       }];
       filename = '培养基推荐导入模板';

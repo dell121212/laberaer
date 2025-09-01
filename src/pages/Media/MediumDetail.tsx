@@ -79,6 +79,38 @@ const MediumDetail: React.FC<MediumDetailProps> = ({ medium, onClose, onEdit }) 
             </div>
           </div>
 
+          {(medium.cultivationParams?.temperature || medium.cultivationParams?.time || medium.cultivationParams?.ph || medium.cultivationParams?.other) && (
+            <div>
+              <h3 className="font-medium text-secondary-800 mb-3">培养参数</h3>
+              <div className="grid grid-cols-2 gap-3">
+                {medium.cultivationParams.temperature && (
+                  <div className="bg-secondary-50 p-3 rounded-lg">
+                    <p className="text-xs text-secondary-500 mb-1">温度</p>
+                    <p className="font-medium text-secondary-800">{medium.cultivationParams.temperature}</p>
+                  </div>
+                )}
+                {medium.cultivationParams.time && (
+                  <div className="bg-secondary-50 p-3 rounded-lg">
+                    <p className="text-xs text-secondary-500 mb-1">时间</p>
+                    <p className="font-medium text-secondary-800">{medium.cultivationParams.time}</p>
+                  </div>
+                )}
+                {medium.cultivationParams.ph && (
+                  <div className="bg-secondary-50 p-3 rounded-lg">
+                    <p className="text-xs text-secondary-500 mb-1">pH值</p>
+                    <p className="font-medium text-secondary-800">{medium.cultivationParams.ph}</p>
+                  </div>
+                )}
+                {medium.cultivationParams.other && (
+                  <div className="bg-secondary-50 p-3 rounded-lg">
+                    <p className="text-xs text-secondary-500 mb-1">其他参数</p>
+                    <p className="font-medium text-secondary-800">{medium.cultivationParams.other}</p>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+
           <div className="grid grid-cols-1 gap-4">
             <div className="flex items-center gap-3">
               <User size={16} className="text-ink-500" />

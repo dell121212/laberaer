@@ -91,9 +91,17 @@ const MediaList: React.FC = () => {
             >
               <div className="flex justify-between items-start mb-3">
                 <h3 className="font-semibold text-ink-900 flex-1">{medium.name}</h3>
-                <div className="flex items-center gap-1 text-orange-500">
-                  <Star size={14} />
-                  <span className="text-xs">推荐</span>
+                <div className="flex items-center gap-2">
+                  <span className={`px-2 py-1 text-xs rounded-full ${
+                    medium.type === 'liquid' 
+                      ? 'bg-blue-100 text-blue-700' 
+                      : 'bg-green-100 text-green-700'
+                  }`}>
+                    {medium.type === 'liquid' ? '液体' : '固体'}
+                  </span>
+                  <div className="flex items-center gap-1 text-orange-500">
+                    <Star size={14} />
+                  </div>
                 </div>
               </div>
 

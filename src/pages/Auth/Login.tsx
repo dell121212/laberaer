@@ -64,7 +64,7 @@ const Login: React.FC = () => {
         }
       }
     } catch (err) {
-      setError('操作失败，请重试');
+      setError(err instanceof Error ? err.message : '操作失败，请重试');
     } finally {
       setLoading(false);
     }

@@ -414,8 +414,15 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
           const newMedia = data.map((item: any) => ({
             id: Date.now().toString() + Math.random(),
             name: item['培养基名称'] || item.name || '',
+            type: (item['类型'] === '液体发酵' ? 'liquid' : 'solid') || item.type || 'solid',
             suitableStrains: (item['适用菌种'] || item.suitableStrains || '').split(',').filter((s: string) => s.trim()),
             formula: item['配方'] || item.formula || '',
+            cultivationParams: {
+              temperature: item['培养温度'] || item.cultivationParams?.temperature || '',
+              time: item['培养时间'] || item.cultivationParams?.time || '',
+              ph: item['pH值'] || item.cultivationParams?.ph || '',
+              other: item['其他参数'] || item.cultivationParams?.other || ''
+            },
             recommendedBy: item['推荐人'] || item.recommendedBy || '导入用户',
             createdAt: new Date(),
             updatedAt: new Date()

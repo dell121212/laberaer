@@ -28,6 +28,7 @@ const AdminPanel: React.FC = () => {
   useEffect(() => {
     // 检查管理员权限
     if (!user || user.role !== 'admin') {
+      alert('只有管理员可以访问后台管理');
       navigate('/home');
       return;
     }

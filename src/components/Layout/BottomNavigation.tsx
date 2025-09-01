@@ -1,7 +1,7 @@
 import React from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
-import { Home, Beaker, Users, Calendar, FlaskConical, Activity } from 'lucide-react';
+import { Home, Users, Settings, Activity, Shield } from 'lucide-react';
 
 const BottomNavigation: React.FC = () => {
   const navigate = useNavigate();
