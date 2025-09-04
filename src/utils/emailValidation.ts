@@ -11,14 +11,17 @@ export const generateVerificationCode = (): string => {
 
 // 模拟发送验证邮件（实际项目中需要后端支持）
 export const sendVerificationEmail = async (email: string, code: string): Promise<boolean> => {
-  // 这里模拟发送邮件的过程
+  // 实际发送邮件的模拟实现
   console.log(`发送验证码到 ${email}: ${code}`);
+  
+  // 在控制台显示验证码供测试使用
+  alert(`验证码已发送到 ${email}\n\n测试用验证码: ${code}\n\n(实际项目中验证码会发送到邮箱)`);
   
   // 模拟网络延迟
   await new Promise(resolve => setTimeout(resolve, 1000));
   
-  // 模拟成功率（实际项目中应该调用真实的邮件服务）
-  return Math.random() > 0.1; // 90% 成功率
+  // 模拟发送成功（实际项目中应该调用真实的邮件服务）
+  return true;
 };
 
 // 验证码存储（实际项目中应该存储在后端）

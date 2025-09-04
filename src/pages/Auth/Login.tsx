@@ -13,9 +13,20 @@ const Login: React.FC = () => {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [loading, setLoading] = useState(false);
+  const [resendCooldown, setResendCooldown] = useState(0);
   
-  const { login, register, completePendingRegistration, pendingRegistration } = useAuth();
+  const { login, register, completePendingRegistration, pendingRegistration, sendVerificationCode } = useAuth();
   const navigate = useNavigate();
+
+  // 重发验证码冷却计时器
+  React.useEffect(() => {
+    if (resendCooldown > 0) {
+      const timer = setTimeout(() => {
+        setResendCooldown(resendCooldown - 1);
+      }, 1000);
+      return () => clearTimeout(timer);
+    }
+  }, [resendCooldown]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -70,6 +81,27 @@ const Login: React.FC = () => {
     }
   };
 
+  const handleResendCode = async () => {
+    if (resendCooldown > 0) return;
+    
+    setLoading(true);
+    setError('');
+    
+    try {
+      const success = await sendVerificationCode(email);
+      if (success) {
+        setSuccess('验证码已重新发送到您的邮箱');
+        setResendCooldown(60); // 60秒冷却时间
+      } else {
+        setError('验证码发送失败，请重试');
+      }
+    } catch (err) {
+      setError('验证码发送失败，请重试');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-primary-50 via-secondary-50 to-primary-100 flex items-center justify-center p-4 relative overflow-hidden">
       {/* 背景装饰 */}
@@ -107,11 +139,13 @@ const Login: React.FC = () => {
               👤 
               用户名
             </label>
+            <p className="text-xs text-secondary-500 mb-2">用户名请输入姓名</p>
             <input
               type="text"
               value={username}
               onChange={(e) => setUsername(e.target.value)}
               className="modern-input"
+              placeholder="请输入您的真实姓名"
               required
             />
           </div>
@@ -163,6 +197,17 @@ const Login: React.FC = () => {
               <p className="text-xs text-secondary-500 mt-1">
                 验证码已发送到您的邮箱，请查收（5分钟内有效）
               </p>
+              <div className="flex gap-2 mt-2">
+                <button
+                  type="button"
+                  onClick={handleResendCode}
+                  disabled={resendCooldown > 0 || loading}
+                  className="text-xs text-primary-600 hover:text-primary-700 disabled:text-secondary-400 
+                           disabled:cursor-not-allowed transition-colors"
+                >
+                  {resendCooldown > 0 ? `重新发送 (${resendCooldown}s)` : '重新发送验证码'}
+                </button>
+              </div>
             </div>
           )}
 
