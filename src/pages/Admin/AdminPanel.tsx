@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
+import { supabase } from '../../lib/supabase';
 import { User } from '../../types';
 import { 
   Users, 
@@ -37,9 +38,29 @@ const AdminPanel: React.FC = () => {
     loadUsers();
   }, [user, navigate]);
 
-  const loadUsers = () => {
-    const savedUsers = JSON.parse(localStorage.getItem('global_users') || '[]');
-    setUsers(savedUsers);
+  const loadUsers = async () => {
+    try {
+      const { data: usersData, error } = await supabase
+        .from('users')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+
+      if (usersData) {
+        const formattedUsers = usersData.map(user => ({
+          id: user.id,
+          username: user.username,
+          email: user.email,
+          role: user.role,
+          isBlocked: user.is_blocked,
+          createdAt: new Date(user.created_at)
+        }));
+        setUsers(formattedUsers);
+      }
+    } catch (error) {
+      console.error('加载用户数据失败:', error);
+    }
   };
 
   const filteredUsers = users.filter(u =>
@@ -47,41 +68,78 @@ const AdminPanel: React.FC = () => {
     u.email.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
-  const handleDeleteUser = (userId: string) => {
+  const handleDeleteUser = async (userId: string) => {
     if (window.confirm('确定要删除这个用户吗？此操作不可恢复。')) {
-      const updatedUsers = users.filter(u => u.id !== userId);
-      setUsers(updatedUsers);
-      localStorage.setItem('global_users', JSON.stringify(updatedUsers));
-    }
-  };
+      try {
+        const { error } = await supabase
+          .from('users')
+          .delete()
+          .eq('id', userId);
 
-  const handleToggleRole = (userId: string) => {
-    const updatedUsers = users.map(u => 
-      u.id === userId 
-        ? { ...u, role: u.role === 'admin' ? 'member' : 'admin' as 'admin' | 'member' }
-        : u
-    );
-    setUsers(updatedUsers);
-    localStorage.setItem('global_users', JSON.stringify(updatedUsers));
-    
-    // 更新当前用户信息（如果修改的是当前用户）
-    if (userId === user.id) {
-      const updatedCurrentUser = updatedUsers.find(u => u.id === userId);
-      if (updatedCurrentUser) {
-        localStorage.setItem('current_user', JSON.stringify(updatedCurrentUser));
+        if (error) throw error;
+
+        setUsers(prev => prev.filter(u => u.id !== userId));
+      } catch (error) {
+        console.error('删除用户失败:', error);
+        alert('删除用户失败，请重试');
       }
     }
   };
 
-  const handleToggleUserStatus = (userId: string) => {
-    const updatedUsers = users.map(u => 
-      u.id === userId 
-        ? { ...u, isBlocked: !u.isBlocked }
-        : u
-    );
-    setUsers(updatedUsers);
-    localStorage.setItem('global_users', JSON.stringify(updatedUsers));
+  const handleToggleRole = async (userId: string) => {
+    try {
+      const targetUser = users.find(u => u.id === userId);
+      if (!targetUser) return;
+
+      const newRole = targetUser.role === 'admin' ? 'member' : 'admin';
+      
+      const { error } = await supabase
+        .from('users')
+        .update({ role: newRole })
+        .eq('id', userId);
+
+      if (error) throw error;
+
+      setUsers(prev => prev.map(u => 
+        u.id === userId ? { ...u, role: newRole as 'admin' | 'member' } : u
+      ));
+
+      // 更新当前用户信息（如果修改的是当前用户）
+      if (userId === user.id) {
+        const updatedUser = { ...user, role: newRole as 'admin' | 'member' };
+        localStorage.setItem('current_user', JSON.stringify(updatedUser));
+      }
+    } catch (error) {
+      console.error('更新用户角色失败:', error);
+      alert('更新用户角色失败，请重试');
+    }
   };
+
+  const handleToggleUserStatus = async (userId: string) => {
+    try {
+      const targetUser = users.find(u => u.id === userId);
+      if (!targetUser) return;
+
+      const newStatus = !targetUser.isBlocked;
+      
+      const { error } = await supabase
+        .from('users')
+        .update({ is_blocked: newStatus })
+        .eq('id', userId);
+
+      if (error) throw error;
+
+      setUsers(prev => prev.map(u => 
+        u.id === userId ? { ...u, isBlocked: newStatus } : u
+      ));
+    } catch (error) {
+      console.error('更新用户状态失败:', error);
+      alert('更新用户状态失败，请重试');
+    }
+  };
+
+  // 添加 supabase 导入
+  const { supabase } = require('../lib/supabase');
   const stats = {
     totalUsers: users.length,
     adminUsers: users.filter(u => u.role === 'admin').length,

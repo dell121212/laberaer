@@ -71,41 +71,21 @@ const Login: React.FC = () => {
       if (isLogin) {
         const success = await login(username, password);
         if (success) {
-          navigate('/lab');
+          navigate('/home');
         } else {
           setError('用户名或密码错误');
         }
       } else {
-        if (showVerification || pendingRegistration) {
-          // 完成验证码验证
-          const result = await completePendingRegistration(verificationCode);
-          if (result.success) {
-            setSuccess('注册成功！请登录');
-            setShowVerification(false);
-            setIsLogin(true);
-            setUsername('');
-            setEmail('');
-            setPassword('');
-            setVerificationCode('');
-          } else {
-            setError(result.message);
-          }
+        // 简化注册流程
+        const result = await register(username, email, password);
+        if (result.success) {
+          setSuccess('注册成功！请登录');
+          setIsLogin(true);
+          setUsername('');
+          setEmail('');
+          setPassword('');
         } else {
-          // 发送验证码
-          const result = await register(username, email, password);
-          if (result.success) {
-            setSuccess('注册成功！请登录');
-            setIsLogin(true);
-            setUsername('');
-            setEmail('');
-            setPassword('');
-          } else if (result.needsVerification) {
-            setShowVerification(true);
-            setSuccess(result.message || '');
-            setError('');
-          } else {
-            setError(result.message || '注册失败');
-          }
+          setError(result.message || '注册失败');
         }
       }
     } catch (err) {
@@ -279,43 +259,12 @@ const Login: React.FC = () => {
             />
           </div>
 
-          {(!isLogin && (showVerification || pendingRegistration)) && (
-            <div>
-              <label className="block text-sm font-medium text-secondary-700 mb-2">
-                🔢 
-                验证码
-              </label>
-              <input
-                type="text"
-                value={verificationCode}
-                onChange={(e) => setVerificationCode(e.target.value)}
-                className="modern-input"
-                placeholder="请输入邮箱收到的验证码"
-                required
-              />
-              <p className="text-xs text-secondary-500 mt-1">
-                验证码已发送到您的邮箱，请查收（5分钟内有效）
-              </p>
-              <div className="flex gap-2 mt-2">
-                <button
-                  type="button"
-                  onClick={handleResendCode}
-                  disabled={resendCooldown > 0 || loading}
-                  className="text-xs text-primary-600 hover:text-primary-700 disabled:text-secondary-400 
-                           disabled:cursor-not-allowed transition-colors"
-                >
-                  {resendCooldown > 0 ? `重新发送 (${resendCooldown}s)` : '重新发送验证码'}
-                </button>
-              </div>
-            </div>
-          )}
-
           {error && (
             <div className="text-error-600 text-sm bg-error-50 p-3 rounded-xl border border-error-200 animate-slide-up">
               ❌ {error}
               {error.includes('系统配置') && (
                 <div className="mt-2 text-xs text-error-500">
-                  请确保Supabase环境变量已正确配置
+                  {isLogin ? '登录' : '注册'}
                 </div>
               )}
             </div>
@@ -354,7 +303,7 @@ const Login: React.FC = () => {
             }}
             className="text-secondary-600 hover:text-primary-600 text-sm font-medium transition-colors"
           >
-            {isLogin ? '没有账号？立即注册' : (showVerification || pendingRegistration) ? '返回登录' : '已有账号？返回登录'}
+            {isLogin ? '没有账号？立即注册' : '已有账号？返回登录'}
           </button>
         </div>
         

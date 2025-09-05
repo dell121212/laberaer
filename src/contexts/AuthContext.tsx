@@ -13,10 +13,12 @@ export interface User {
 interface AuthContextType {
   user: User | null;
   loading: boolean;
-  login: (email: string, password: string) => Promise<void>;
-  register: (username: string, email: string, password: string) => Promise<void>;
-  logout: () => Promise<void>;
-  updateProfile: (updates: Partial<User>) => Promise<void>;
+  login: (username: string, password: string) => Promise<boolean>;
+  register: (username: string, email: string, password: string) => Promise<{ success: boolean; needsVerification?: boolean; message?: string }>;
+  logout: () => void;
+  sendVerificationCode: (email: string) => Promise<boolean>;
+  completePendingRegistration: (code: string) => Promise<{ success: boolean; message: string }>;
+  pendingRegistration: any;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -36,177 +38,155 @@ interface AuthProviderProps {
 export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
+  const [pendingRegistration, setPendingRegistration] = useState<any>(null);
 
   useEffect(() => {
-    // Check if user is already logged in
-    checkUser();
-    
-    // Listen for auth changes
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
-      if (event === 'SIGNED_IN' && session?.user) {
-        await loadUserProfile(session.user.id);
-      } else if (event === 'SIGNED_OUT') {
-        setUser(null);
-      }
-      setLoading(false);
-    });
-
-    return () => subscription.unsubscribe();
-  }, []);
-
-  const checkUser = async () => {
-    try {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (session?.user) {
-        await loadUserProfile(session.user.id);
-      }
-    } catch (error) {
-      console.error('Error checking user:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const loadUserProfile = async (userId: string) => {
-    try {
-      const { data, error } = await supabase
-        .from('users')
-        .select('*')
-        .eq('id', userId)
-        .single();
-
-      if (error) throw error;
-
-      if (data) {
+    // 检查本地存储的用户信息
+    const savedUser = localStorage.getItem('current_user');
+    if (savedUser) {
+      try {
+        const userData = JSON.parse(savedUser);
         setUser({
-          id: data.id,
-          username: data.username,
-          email: data.email,
-          role: data.role,
-          isBlocked: data.is_blocked,
-          createdAt: new Date(data.created_at)
+          ...userData,
+          createdAt: new Date(userData.createdAt)
         });
+      } catch (error) {
+        console.error('解析用户数据失败:', error);
+        localStorage.removeItem('current_user');
       }
-    } catch (error) {
-      console.error('Error loading user profile:', error);
     }
-  };
+
+    // 确保管理员账户存在
+    ensureAdminExists();
+    setLoading(false);
+  }, []);
 
   const ensureAdminExists = async () => {
     try {
-      // First try to login as admin
-      const { error: loginError } = await supabase.auth.signInWithPassword({
-        email: 'admin@lab.com',
-        password: 'admin123'
-      });
+      // 检查数据库中是否存在管理员
+      const { data: existingAdmin } = await supabase
+        .from('users')
+        .select('*')
+        .eq('username', 'admin')
+        .single();
 
-      if (!loginError) {
-        return; // Admin exists and we're logged in
+      if (!existingAdmin) {
+        // 创建管理员账户
+        const { error } = await supabase
+          .from('users')
+          .insert({
+            username: 'admin',
+            email: 'admin@sgxy.edu.cn',
+            password: 'admin', // 简单存储，实际项目中应该加密
+            role: 'admin',
+            is_blocked: false
+          });
+
+        if (error) {
+          console.error('创建管理员失败:', error);
+        }
       }
-
-      // If login failed, create admin user using RPC function
-      const { error: createError } = await supabase.rpc('create_user', {
-        p_username: 'admin',
-        p_email: 'admin@lab.com',
-        p_password: 'admin123',
-        p_role: 'admin'
-      });
-
-      if (createError) {
-        throw createError;
-      }
-
-      // Now login as the newly created admin
-      const { error: finalLoginError } = await supabase.auth.signInWithPassword({
-        email: 'admin@lab.com',
-        password: 'admin123'
-      });
-
-      if (finalLoginError) {
-        throw finalLoginError;
-      }
-
     } catch (error) {
-      console.error('创建管理员失败:', error);
-      throw error;
+      console.error('检查管理员账户失败:', error);
     }
   };
 
-  const login = async (email: string, password: string) => {
+  const login = async (username: string, password: string): Promise<boolean> => {
     try {
-      const { error } = await supabase.auth.signInWithPassword({
-        email,
-        password
-      });
+      const { data: userData, error } = await supabase
+        .from('users')
+        .select('*')
+        .eq('username', username)
+        .eq('password', password)
+        .single();
 
-      if (error) {
-        if (error.message.includes('Invalid login credentials')) {
-          // If it's the admin trying to login and credentials are invalid, try to create admin
-          if (email === 'admin@lab.com') {
-            await ensureAdminExists();
-            return;
-          }
-        }
-        throw error;
+      if (error || !userData) {
+        return false;
       }
-    } catch (error: any) {
-      console.error('Login error:', error);
-      throw new Error(error.message || '登录失败');
+
+      if (userData.is_blocked) {
+        throw new Error('账户已被限制，请联系管理员');
+      }
+
+      const user: User = {
+        id: userData.id,
+        username: userData.username,
+        email: userData.email,
+        role: userData.role,
+        isBlocked: userData.is_blocked,
+        createdAt: new Date(userData.created_at)
+      };
+
+      setUser(user);
+      localStorage.setItem('current_user', JSON.stringify(user));
+      return true;
+    } catch (error) {
+      console.error('登录失败:', error);
+      return false;
     }
   };
 
   const register = async (username: string, email: string, password: string) => {
     try {
-      // Use RPC function to create user (bypasses RLS)
-      const { error } = await supabase.rpc('create_user', {
-        p_username: username,
-        p_email: email,
-        p_password: password,
-        p_role: 'member'
-      });
-
-      if (error) throw error;
-
-      // Now login with the new credentials
-      await login(email, password);
-    } catch (error: any) {
-      console.error('Registration error:', error);
-      throw new Error(error.message || '注册失败');
-    }
-  };
-
-  const logout = async () => {
-    try {
-      const { error } = await supabase.auth.signOut();
-      if (error) throw error;
-      setUser(null);
-    } catch (error: any) {
-      console.error('Logout error:', error);
-      throw new Error(error.message || '登出失败');
-    }
-  };
-
-  const updateProfile = async (updates: Partial<User>) => {
-    if (!user) throw new Error('No user logged in');
-
-    try {
-      const { error } = await supabase
+      // 检查用户名是否已存在
+      const { data: existingUser } = await supabase
         .from('users')
-        .update({
-          username: updates.username,
-          email: updates.email,
-          role: updates.role,
-          is_blocked: updates.isBlocked
+        .select('username')
+        .eq('username', username)
+        .single();
+
+      if (existingUser) {
+        return { success: false, message: '用户名已存在' };
+      }
+
+      // 检查邮箱是否已存在
+      const { data: existingEmail } = await supabase
+        .from('users')
+        .select('email')
+        .eq('email', email)
+        .single();
+
+      if (existingEmail) {
+        return { success: false, message: '邮箱已被注册' };
+      }
+
+      // 创建新用户
+      const { data: newUser, error } = await supabase
+        .from('users')
+        .insert({
+          username,
+          email,
+          password, // 简单存储，实际项目中应该加密
+          role: 'member',
+          is_blocked: false
         })
-        .eq('id', user.id);
+        .select()
+        .single();
 
-      if (error) throw error;
+      if (error) {
+        return { success: false, message: '注册失败：' + error.message };
+      }
 
-      setUser(prev => prev ? { ...prev, ...updates } : null);
-    } catch (error: any) {
-      console.error('Update profile error:', error);
-      throw new Error(error.message || '更新资料失败');
+      return { success: true, message: '注册成功' };
+    } catch (error) {
+      console.error('注册失败:', error);
+      return { success: false, message: '注册失败，请重试' };
     }
+  };
+
+  const logout = () => {
+    setUser(null);
+    localStorage.removeItem('current_user');
+  };
+
+  const sendVerificationCode = async (email: string): Promise<boolean> => {
+    // 简化版本，直接返回成功
+    return true;
+  };
+
+  const completePendingRegistration = async (code: string) => {
+    // 简化版本，直接返回成功
+    return { success: true, message: '验证成功' };
   };
 
   const value: AuthContextType = {
@@ -215,7 +195,9 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     login,
     register,
     logout,
-    updateProfile
+    sendVerificationCode,
+    completePendingRegistration,
+    pendingRegistration
   };
 
   return (
