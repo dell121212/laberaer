@@ -24,6 +24,10 @@ const StrainForm: React.FC<StrainFormProps> = ({ strain, onClose, onSuccess }) =
     location: '',
     description: '',
     addedBy: user?.username || '',
+    transferReminder: {
+      enabled: false,
+      intervalDays: 30
+    }
   });
 
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -39,7 +43,11 @@ const StrainForm: React.FC<StrainFormProps> = ({ strain, onClose, onSuccess }) =
         preservationTemperature: strain.preservationTemperature || '',
         location: strain.location,
         description: strain.description,
-        addedBy: strain.addedBy
+        addedBy: strain.addedBy,
+        transferReminder: {
+          enabled: false,
+          intervalDays: 30
+        }
       });
     }
   }, [strain]);
@@ -124,52 +132,6 @@ const StrainForm: React.FC<StrainFormProps> = ({ strain, onClose, onSuccess }) =
               </button>
             </div>
           </div>
-
-          <div className="md:col-span-2">
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              转接提醒设置
-            </label>
-            <div className="space-y-3 p-4 bg-gray-50 rounded-lg">
-              <label className="flex items-center gap-2">
-                <input
-                  type="checkbox"
-                  checked={formData.transferReminder.enabled}
-                  onChange={(e) => setFormData(prev => ({
-                    ...prev,
-                    transferReminder: {
-                      ...prev.transferReminder,
-                      enabled: e.target.checked
-                    }
-                  }))}
-                  className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-                />
-                <span className="text-sm text-gray-700">启用转接提醒</span>
-              </label>
-              
-              {formData.transferReminder.enabled && (
-                <div>
-                  <label className="block text-sm text-gray-600 mb-1">
-                    提醒间隔（天）
-                  </label>
-                  <input
-                    type="number"
-                    min="1"
-                    max="365"
-                    value={formData.transferReminder.intervalDays}
-                    onChange={(e) => setFormData(prev => ({
-                      ...prev,
-                      transferReminder: {
-                        ...prev.transferReminder,
-                        intervalDays: parseInt(e.target.value) || 30
-                      }
-                    }))}
-                    className="modern-input"
-                    placeholder="30"
-                  />
-                </div>
-              )}
-            </div>
-          </div>
         </div>
 
         <form onSubmit={handleSubmit} className="p-6 overflow-y-auto max-h-[calc(90vh-120px)]">
@@ -248,7 +210,111 @@ const StrainForm: React.FC<StrainFormProps> = ({ strain, onClose, onSuccess }) =
             </div>
 
             <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                保藏温度 *
+              </label>
+              <input
                 type="text"
+                value={formData.preservationTemperature}
+                onChange={(e) => handleInputChange('preservationTemperature', e.target.value)}
+                className={`modern-input ${errors.preservationTemperature ? 'border-red-500' : ''}`}
+                placeholder="请输入保藏温度"
+              />
+              {errors.preservationTemperature && <p className="text-red-500 text-sm mt-1">{errors.preservationTemperature}</p>}
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                保藏位置 *
+              </label>
+              <input
+                type="text"
+                value={formData.location}
+                onChange={(e) => handleInputChange('location', e.target.value)}
+                className={`modern-input ${errors.location ? 'border-red-500' : ''}`}
+                placeholder="请输入保藏位置"
+              />
+              {errors.location && <p className="text-red-500 text-sm mt-1">{errors.location}</p>}
+            </div>
+
+            <div className="md:col-span-2">
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                描述
+              </label>
+              <textarea
+                value={formData.description}
+                onChange={(e) => handleInputChange('description', e.target.value)}
+                className="modern-input"
+                rows={3}
+                placeholder="请输入菌种描述"
+              />
+            </div>
+
+            <div className="md:col-span-2">
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                转接提醒设置
+              </label>
+              <div className="space-y-3 p-4 bg-gray-50 rounded-lg">
+                <label className="flex items-center gap-2">
+                  <input
+                    type="checkbox"
+                    checked={formData.transferReminder.enabled}
+                    onChange={(e) => setFormData(prev => ({
+                      ...prev,
+                      transferReminder: {
+                        ...prev.transferReminder,
+                        enabled: e.target.checked
+                      }
+                    }))}
+                    className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                  />
+                  <span className="text-sm text-gray-700">启用转接提醒</span>
+                </label>
+                
+                {formData.transferReminder.enabled && (
+                  <div>
+                    <label className="block text-sm text-gray-600 mb-1">
+                      提醒间隔（天）
+                    </label>
+                    <input
+                      type="number"
+                      min="1"
+                      max="365"
+                      value={formData.transferReminder.intervalDays}
+                      onChange={(e) => setFormData(prev => ({
+                        ...prev,
+                        transferReminder: {
+                          ...prev.transferReminder,
+                          intervalDays: parseInt(e.target.value) || 30
+                        }
+                      }))}
+                      className="modern-input"
+                      placeholder="30"
+                    />
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+
+          <div className="flex justify-end gap-3 mt-6 pt-6 border-t">
+            <button
+              type="button"
+              onClick={onClose}
+              className="px-6 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors"
+            >
+              取消
+            </button>
+            <button
+              type="submit"
+              className="px-6 py-2 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg hover:from-blue-700 hover:to-purple-700 transition-all duration-200 flex items-center gap-2"
+            >
+              <Save className="w-4 h-4" />
+              {strain ? '更新' : '添加'}
+            </button>
+          </div>
+        </form>
+      </div>
     </div>
   );
 };
