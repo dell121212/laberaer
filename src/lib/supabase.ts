@@ -44,6 +44,62 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
   }, [user]);
 
   const loadAllData = async () => {
+    try {
+      // 加载菌种数据
+      const { data: strainsData } = await supabase
+        .from('strains')
+        .select('*')
+        .order('added_at', { ascending: false });
+
+      if (strainsData) {
+        setStrains(strainsData.map(item => ({
+          id: item.id,
+          name: item.name,
+          scientificName: item.scientific_name,
+          type: item.type,
+          description: item.description,
+          source: item.source,
+          preservationMethod: item.preservation_method,
+          preservationTemperature: item.preservation_temperature,
+          location: item.location,
+          addedBy: item.added_by,
+          addedAt: new Date(item.added_at),
+          updatedAt: new Date(item.updated_at)
+        })));
+      }
+
+      // 加载成员数据
+      const { data: membersData } = await supabase
+        .from('members')
+        .select('*')
+        .order('joined_at', { ascending: false });
+
+      if (membersData) {
+        setMembers(membersData.map(item => ({
+          id: item.id,
+          name: item.name,
+          group: item.group,
+          phone: item.phone,
+          grade: item.grade,
+          class: item.class,
+          thesisContent: item.thesis_content,
+          otherInfo: item.other_info,
+          joinedAt: new Date(item.joined_at),
+          updatedAt: new Date(item.updated_at)
+        })));
+      }
+
+      // 加载值日安排数据
+      const { data: dutiesData } = await supabase
+        .from('duty_schedules')
+        .select('*')
+        .order('date', { ascending: false });
+
+      if (dutiesData) {
+        setDutySchedules(dutiesData.map(item => ({
+          id: item.id,
+          date: item.date,
+          members: item.members,
           tasks: item.tasks,
           status: item.status as 'pending' | 'completed' | 'skipped',
           notes: item.notes,
