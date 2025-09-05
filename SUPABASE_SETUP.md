@@ -39,6 +39,10 @@ VITE_EMAILJS_PUBLIC_KEY=dM_PUilQ-JgdKdyAP
 3. 复制 `supabase/migrations/create_sgxy_schema.sql` 的内容
 4. 粘贴到查询编辑器中
 5. 点击 **Run** 执行
+6. 运行用户注册权限修复：
+   - 复制 `supabase/migrations/fix_user_registration_policy.sql` 的内容
+   - 粘贴到新的查询中并执行
+   - 这将允许匿名用户进行注册操作
 
 ### 5. 启用认证功能
 在 Supabase Dashboard 中：
