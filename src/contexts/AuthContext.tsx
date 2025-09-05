@@ -1,23 +1,8 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import { supabase } from '../lib/supabase';
 import { validateEmail, generateVerificationCode, sendVerificationEmail, storeVerificationCode, verifyCode } from '../utils/emailValidation';
 import { User, AuthContextType } from '../types';
 
-// 创建全局用户存储
-const GLOBAL_USERS_KEY = 'global_users';
-const CURRENT_USER_KEY = 'current_user';
-
-const getGlobalUsers = (): User[] => {
-  try {
-    const users = localStorage.getItem(GLOBAL_USERS_KEY);
-    return users ? JSON.parse(users) : [];
-  } catch {
-    return [];
-  }
-};
-
-const setGlobalUsers = (users: User[]) => {
-  localStorage.setItem(GLOBAL_USERS_KEY, JSON.stringify(users));
-};
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
@@ -29,44 +14,117 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     verificationCode: string;
   } | null>(null);
 
-  // 初始化管理员账户
+  // 检查用户登录状态
   useEffect(() => {
-    const users = getGlobalUsers();
-    const adminExists = users.some(u => u.username === 'admin');
-    
-    if (!adminExists) {
-      const adminUser: User = {
-        id: 'admin-001',
-        username: 'admin',
-        email: 'admin@sgxy.edu.cn',
-        password: 'admin',
-        role: 'admin',
-        createdAt: new Date()
-      };
-      users.push(adminUser);
-      setGlobalUsers(users);
-    }
-  }, []);
+    const checkUser = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session?.user) {
+        // 从数据库获取用户详细信息
+        const { data: userData } = await supabase
+          .from('users')
+          .select('*')
+          .eq('email', session.user.email)
+          .single();
+        
+        if (userData) {
+          const userObj: User = {
+            id: userData.id,
+            username: userData.username,
+            email: userData.email,
+            password: userData.password,
+            role: userData.role as 'admin' | 'member',
+            isBlocked: userData.is_blocked,
+            createdAt: new Date(userData.created_at)
+          };
+          setUser(userObj);
+        }
+      }
+    };
 
-  useEffect(() => {
-    const savedUser = localStorage.getItem(CURRENT_USER_KEY);
-    if (savedUser) {
-      setUser(JSON.parse(savedUser));
-    }
+    checkUser();
+
+    // 监听认证状态变化
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+      if (event === 'SIGNED_IN' && session?.user) {
+        const { data: userData } = await supabase
+          .from('users')
+          .select('*')
+          .eq('email', session.user.email)
+          .single();
+        
+        if (userData) {
+          const userObj: User = {
+            id: userData.id,
+            username: userData.username,
+            email: userData.email,
+            password: userData.password,
+            role: userData.role as 'admin' | 'member',
+            isBlocked: userData.is_blocked,
+            createdAt: new Date(userData.created_at)
+          };
+          setUser(userObj);
+        }
+      } else if (event === 'SIGNED_OUT') {
+        setUser(null);
+      }
+    });
+
+    return () => subscription.unsubscribe();
   }, []);
 
   const login = async (username: string, password: string): Promise<boolean> => {
-    const users = getGlobalUsers();
-    const foundUser = users.find((u: User) => u.username === username && u.password === password);
-    
-    if (foundUser && !foundUser.isBlocked) {
-      setUser(foundUser);
-      localStorage.setItem(CURRENT_USER_KEY, JSON.stringify(foundUser));
+    try {
+      // 从数据库查找用户
+      const { data: userData, error } = await supabase
+        .from('users')
+        .select('*')
+        .eq('username', username)
+        .eq('password', password)
+        .single();
+
+      if (error || !userData) {
+        return false;
+      }
+
+      if (userData.is_blocked) {
+        throw new Error('账户已被限制登录，请联系管理员');
+      }
+
+      // 使用Supabase Auth登录
+      const { error: signInError } = await supabase.auth.signInWithPassword({
+        email: userData.email,
+        password: password
+      });
+
+      if (signInError) {
+        // 如果Supabase Auth中没有该用户，创建一个
+        const { error: signUpError } = await supabase.auth.signUp({
+          email: userData.email,
+          password: password
+        });
+
+        if (signUpError) {
+          console.error('Auth signup error:', signUpError);
+          return false;
+        }
+      }
+
+      const userObj: User = {
+        id: userData.id,
+        username: userData.username,
+        email: userData.email,
+        password: userData.password,
+        role: userData.role as 'admin' | 'member',
+        isBlocked: userData.is_blocked,
+        createdAt: new Date(userData.created_at)
+      };
+
+      setUser(userObj);
       return true;
-    } else if (foundUser && foundUser.isBlocked) {
-      throw new Error('账户已被限制登录，请联系管理员');
+    } catch (error) {
+      console.error('Login error:', error);
+      throw error;
     }
-    return false;
   };
 
   const sendVerificationCode = async (email: string): Promise<boolean> => {
@@ -85,54 +143,86 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   };
 
   const register = async (username: string, email: string, password: string, verificationCode?: string): Promise<{ success: boolean; needsVerification?: boolean; message?: string }> => {
-    if (!validateEmail(email)) {
-      return { success: false, message: '邮箱格式不正确' };
-    }
-    
-    const users = getGlobalUsers();
-    
-    if (users.some((u: User) => u.username === username)) {
-      return { success: false, message: '用户名已存在' };
-    }
-    
-    if (users.some((u: User) => u.email === email)) {
-      return { success: false, message: '该邮箱已被注册' };
-    }
-
-    // 如果没有提供验证码，发送验证码
-    if (!verificationCode) {
-      const codeSent = await sendVerificationCode(email);
-      if (codeSent) {
-        setPendingRegistration({ username, email, password, verificationCode: '' });
-        return { success: false, needsVerification: true, message: '验证码已发送到您的邮箱' };
-      } else {
-        return { success: false, message: '验证码发送失败，请重试' };
+    try {
+      if (!validateEmail(email)) {
+        return { success: false, message: '邮箱格式不正确' };
       }
+      
+      // 检查用户名是否已存在
+      const { data: existingUser } = await supabase
+        .from('users')
+        .select('username')
+        .eq('username', username)
+        .single();
+
+      if (existingUser) {
+        return { success: false, message: '用户名已存在' };
+      }
+
+      // 检查邮箱是否已存在
+      const { data: existingEmail } = await supabase
+        .from('users')
+        .select('email')
+        .eq('email', email)
+        .single();
+
+      if (existingEmail) {
+        return { success: false, message: '该邮箱已被注册' };
+      }
+
+      // 如果没有提供验证码，发送验证码
+      if (!verificationCode) {
+        const codeSent = await sendVerificationCode(email);
+        if (codeSent) {
+          setPendingRegistration({ username, email, password, verificationCode: '' });
+          return { success: false, needsVerification: true, message: '验证码已发送到您的邮箱' };
+        } else {
+          return { success: false, message: '验证码发送失败，请重试' };
+        }
+      }
+
+      // 验证验证码
+      if (!verifyCode(email, verificationCode)) {
+        return { success: false, message: '验证码错误或已过期' };
+      }
+
+      // 在数据库中创建用户
+      const { error: dbError } = await supabase
+        .from('users')
+        .insert({
+          username,
+          email,
+          password,
+          role: 'member'
+        });
+
+      if (dbError) {
+        console.error('Database insert error:', dbError);
+        return { success: false, message: '注册失败，请重试' };
+      }
+
+      // 在Supabase Auth中创建用户
+      const { error: authError } = await supabase.auth.signUp({
+        email,
+        password
+      });
+
+      if (authError) {
+        console.error('Auth signup error:', authError);
+        // 即使Auth注册失败，数据库中的用户记录仍然有效
+      }
+
+      setPendingRegistration(null);
+      return { success: true, message: '注册成功' };
+    } catch (error) {
+      console.error('Registration error:', error);
+      return { success: false, message: '注册失败，请重试' };
     }
-
-    // 验证验证码
-    if (!verifyCode(email, verificationCode)) {
-      return { success: false, message: '验证码错误或已过期' };
-    }
-
-    const newUser: User = {
-      id: Date.now().toString(),
-      username,
-      email,
-      password,
-      role: 'member', // 所有新用户默认为普通成员
-      createdAt: new Date()
-    };
-
-    users.push(newUser);
-    setGlobalUsers(users);
-    setPendingRegistration(null);
-    return { success: true, message: '注册成功' };
   };
 
-  const logout = () => {
+  const logout = async () => {
+    await supabase.auth.signOut();
     setUser(null);
-    localStorage.removeItem(CURRENT_USER_KEY);
   };
 
   const completePendingRegistration = async (verificationCode: string): Promise<{ success: boolean; message: string }> => {
