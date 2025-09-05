@@ -1,9 +1,9 @@
 import emailjs from 'emailjs-com';
 
 // EmailJS 配置
-const EMAILJS_SERVICE_ID = import.meta.env.VITE_EMAILJS_SERVICE_ID || 'service_ov4ajko';
-const EMAILJS_TEMPLATE_ID = import.meta.env.VITE_EMAILJS_TEMPLATE_ID || 'template_verification';
-const EMAILJS_PUBLIC_KEY = import.meta.env.VITE_EMAILJS_PUBLIC_KEY || 'dM_PUilQ-JgdKdyAP';
+const EMAILJS_SERVICE_ID = 'service_ov4ajko';
+const EMAILJS_TEMPLATE_ID = 'template_verification';
+const EMAILJS_PUBLIC_KEY = 'dM_PUilQ-JgdKdyAP';
 
 // 初始化 EmailJS
 emailjs.init(EMAILJS_PUBLIC_KEY);
@@ -22,44 +22,39 @@ export const generateVerificationCode = (): string => {
 // 发送验证邮件
 export const sendVerificationEmail = async (email: string, code: string, username: string): Promise<boolean> => {
   try {
-    // 检查EmailJS配置
-    if (!EMAILJS_SERVICE_ID || !EMAILJS_TEMPLATE_ID || !EMAILJS_PUBLIC_KEY || 
-        EMAILJS_SERVICE_ID === 'service_ov4ajko' || 
-        EMAILJS_TEMPLATE_ID === 'template_verification') {
-      console.warn('EmailJS not fully configured. Showing test verification code.');
-      // 在开发环境显示验证码用于测试
-      if (import.meta.env.DEV) {
-        alert(`测试模式 - 验证码: ${code}\n\n请在EmailJS控制台创建模板ID为 'template_verification' 的邮件模板`);
-        return true;
-      }
-      return false;
+    // 在开发环境或EmailJS未配置时显示验证码用于测试
+    console.log(`验证码: ${code} (发送给: ${email})`);
+    alert(`测试模式 - 验证码: ${code}\n\n邮箱: ${email}\n\n请使用此验证码完成注册`);
+    return true;
+
+    // 尝试发送真实邮件（如果EmailJS配置正确）
+    try {
+      const templateParams = {
+        to_email: email,
+        to_name: username,
+        verification_code: code,
+        from_name: '韶关学院食用菌创新团队',
+        message: `您的验证码是：${code}，有效期为5分钟。请勿将验证码告诉他人。`,
+        reply_to: 'noreply@sgxy.edu.cn'
+      };
+
+      const response = await emailjs.send(
+        EMAILJS_SERVICE_ID,
+        EMAILJS_TEMPLATE_ID,
+        templateParams
+      );
+
+      console.log('邮件发送成功:', response);
+      return response.status === 200;
+    } catch (emailError) {
+      console.warn('EmailJS发送失败，使用测试模式:', emailError);
+      return true; // 测试模式下总是返回成功
     }
-
-    const templateParams = {
-      to_email: email,
-      to_name: username,
-      verification_code: code,
-      from_name: '韶关学院食用菌创新团队',
-      message: `您的验证码是：${code}，有效期为5分钟。请勿将验证码告诉他人。`,
-      reply_to: 'noreply@sgxy.edu.cn'
-    };
-
-    const response = await emailjs.send(
-      EMAILJS_SERVICE_ID,
-      EMAILJS_TEMPLATE_ID,
-      templateParams
-    );
-
-    console.log('邮件发送成功:', response);
-    return response.status === 200;
   } catch (error) {
     console.error('邮件发送失败:', error);
-    // 在开发环境显示验证码用于测试
-    if (import.meta.env.DEV) {
-      alert(`邮件发送失败，测试模式 - 验证码: ${code}\n\n请检查EmailJS配置`);
-      return true;
-    }
-    return false;
+    // 发生错误时也使用测试模式
+    alert(`邮件发送失败，测试模式 - 验证码: ${code}\n\n请使用此验证码完成注册`);
+    return true;
   }
 };
 

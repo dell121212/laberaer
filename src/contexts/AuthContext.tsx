@@ -22,6 +22,9 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   // 检查用户登录状态
   useEffect(() => {
     const checkUser = async () => {
+      // 确保管理员账户存在
+      await ensureAdminUser();
+      
       const { data: { session } } = await supabase.auth.getSession();
       if (session?.user) {
         // 从数据库获取用户详细信息
@@ -76,6 +79,39 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
     return () => subscription.unsubscribe();
   }, []);
+
+  // 确保管理员账户存在
+  const ensureAdminUser = async () => {
+    try {
+      // 检查管理员账户是否存在
+      const { data: adminExists } = await supabase
+        .from('users')
+        .select('id')
+        .eq('username', 'admin')
+        .single();
+
+      if (!adminExists) {
+        // 创建管理员账户
+        const { error } = await supabase
+          .from('users')
+          .insert({
+            username: 'admin',
+            email: 'admin@sgxy.edu.cn',
+            password: 'admin',
+            role: 'admin',
+            is_blocked: false
+          });
+
+        if (error) {
+          console.error('创建管理员账户失败:', error);
+        } else {
+          console.log('管理员账户创建成功');
+        }
+      }
+    } catch (error) {
+      console.error('检查管理员账户失败:', error);
+    }
+  };
 
   const login = async (username: string, password: string): Promise<boolean> => {
     try {
