@@ -79,6 +79,8 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
   const login = async (username: string, password: string): Promise<boolean> => {
     try {
+      console.log('尝试登录:', { username, password }); // 调试日志
+      
       // 从数据库查找用户
       const { data: userData, error } = await supabase
         .from('users')
@@ -86,12 +88,17 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         .eq('username', username)
         .single();
 
+      console.log('数据库查询结果:', { userData, error }); // 调试日志
+
       if (error || !userData) {
+        console.log('用户不存在或查询失败');
         return false;
       }
 
       // 验证密码
+      console.log('验证密码:', { inputPassword: password, storedPassword: userData.password });
       if (userData.password !== password) {
+        console.log('密码不匹配');
         return false;
       }
 
@@ -109,6 +116,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         createdAt: new Date(userData.created_at)
       };
 
+      console.log('登录成功，用户信息:', userObj);
       setUser(userObj);
       return true;
     } catch (error) {
