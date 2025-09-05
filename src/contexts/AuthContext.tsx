@@ -1,6 +1,11 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { supabase } from '../lib/supabase';
-import { validateEmail, generateVerificationCode, sendVerificationEmail, storeVerificationCode, verifyCode } from '../utils/emailValidation';
+import { 
+  validateEmail, 
+  generateVerificationCode, 
+  sendVerificationEmail,
+  codeManager 
+} from '../utils/emailService';
 import { User, AuthContextType } from '../types';
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -132,11 +137,18 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       return false;
     }
     
+    // 检查是否可以重新发送
+    const { canSend, waitTime } = codeManager.canResend(email);
+    if (!canSend) {
+      alert(`请等待 ${waitTime} 秒后再重新发送验证码`);
+      return false;
+    }
+    
     const code = generateVerificationCode();
-    const success = await sendVerificationEmail(email, code);
+    const success = await sendVerificationEmail(email, code, '用户');
     
     if (success) {
-      storeVerificationCode(email, code);
+      codeManager.storeCode(email, code);
     }
     
     return success;
@@ -182,8 +194,9 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       }
 
       // 验证验证码
-      if (!verifyCode(email, verificationCode)) {
-        return { success: false, message: '验证码错误或已过期' };
+      const verifyResult = codeManager.verifyCode(email, verificationCode);
+      if (!verifyResult.success) {
+        return { success: false, message: verifyResult.message };
       }
 
       // 在数据库中创建用户

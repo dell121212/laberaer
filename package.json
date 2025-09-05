@@ -12,6 +12,7 @@
   "dependencies": {
     "@supabase/supabase-js": "^2.57.0",
     "date-fns": "^4.1.0",
+    "emailjs-com": "^3.2.0",
     "lucide-react": "^0.533.0",
     "nodemailer": "^7.0.5",
     "react": "^18.3.1",

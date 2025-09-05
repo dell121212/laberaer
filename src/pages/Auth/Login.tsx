@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
+import { codeManager } from '../../utils/emailService';
 import { LogIn, UserPlus, ChevronLeft, ChevronRight } from 'lucide-react';
 
 const Login: React.FC = () => {
@@ -117,6 +118,13 @@ const Login: React.FC = () => {
   const handleResendCode = async () => {
     if (resendCooldown > 0) return;
     
+    // 检查是否可以重新发送
+    const { canSend, waitTime } = codeManager.canResend(email);
+    if (!canSend) {
+      setError(`请等待 ${waitTime} 秒后再重新发送验证码`);
+      return;
+    }
+    
     setLoading(true);
     setError('');
     
@@ -124,7 +132,7 @@ const Login: React.FC = () => {
       const success = await sendVerificationCode(email);
       if (success) {
         setSuccess('验证码已重新发送到您的邮箱');
-        setResendCooldown(60); // 60秒冷却时间
+        setResendCooldown(60);
       } else {
         setError('验证码发送失败，请重试');
       }
