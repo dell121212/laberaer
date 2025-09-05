@@ -79,63 +79,24 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
   const login = async (username: string, password: string): Promise<boolean> => {
     try {
-      // 特殊处理管理员账户
-      if (username === 'admin' && password === 'admin') {
-        // 直接从数据库获取管理员信息
-        const { data: adminData, error } = await supabase
-          .from('users')
-          .select('*')
-          .eq('username', 'admin')
-          .single();
-
-        if (adminData) {
-          const userObj: User = {
-            id: adminData.id,
-            username: adminData.username,
-            email: adminData.email,
-            password: adminData.password,
-            role: adminData.role as 'admin' | 'member',
-            isBlocked: adminData.is_blocked,
-            createdAt: new Date(adminData.created_at)
-          };
-          setUser(userObj);
-          return true;
-        }
-      }
-
       // 从数据库查找用户
       const { data: userData, error } = await supabase
         .from('users')
         .select('*')
         .eq('username', username)
-        .eq('password', password)
         .single();
 
       if (error || !userData) {
         return false;
       }
 
-      if (userData.is_blocked) {
-        throw new Error('账户已被限制登录，请联系管理员');
+      // 验证密码
+      if (userData.password !== password) {
+        return false;
       }
 
-      // 使用Supabase Auth登录
-      const { error: signInError } = await supabase.auth.signInWithPassword({
-        email: userData.email,
-        password: password
-      });
-
-      if (signInError) {
-        // 如果Supabase Auth中没有该用户，创建一个
-        const { error: signUpError } = await supabase.auth.signUp({
-          email: userData.email,
-          password: password
-        });
-
-        if (signUpError) {
-          console.error('Auth signup error:', signUpError);
-          return false;
-        }
+      if (userData.is_blocked) {
+        throw new Error('账户已被限制登录，请联系管理员');
       }
 
       const userObj: User = {
@@ -245,17 +206,6 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       if (dbError) {
         console.error('Database insert error:', dbError);
         return { success: false, message: '注册失败，请重试' };
-      }
-
-      // 在Supabase Auth中创建用户
-      const { error: authError } = await supabase.auth.signUp({
-        email,
-        password
-      });
-
-      if (authError) {
-        console.error('Auth signup error:', authError);
-        // 即使Auth注册失败，数据库中的用户记录仍然有效
       }
 
       setPendingRegistration(null);

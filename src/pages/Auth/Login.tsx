@@ -220,7 +220,7 @@ const Login: React.FC = () => {
           {!isLogin && (
             <div className="mt-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
               <p className="text-sm text-blue-700">
-                📧 注册需要邮箱验证，系统将显示验证码弹窗
+                📧 注册需要邮箱验证，验证码将通过弹窗显示
               </p>
             </div>
           )}

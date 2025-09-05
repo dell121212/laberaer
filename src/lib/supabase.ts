@@ -6,7 +6,7 @@ const supabaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY
 let supabase
 
 if (!supabaseUrl || !supabaseKey) {
-  console.warn('Supabase environment variables not configured. Please update .env file with your Supabase project details.')
+  console.warn('Supabase environment variables not configured. Using placeholder values.')
   // 使用占位符避免应用崩溃
   const placeholderUrl = 'https://placeholder.supabase.co'
   const placeholderKey = 'placeholder-key'
