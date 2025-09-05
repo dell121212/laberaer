@@ -79,6 +79,30 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
   const login = async (username: string, password: string): Promise<boolean> => {
     try {
+      // 特殊处理管理员账户
+      if (username === 'admin' && password === 'admin') {
+        // 直接从数据库获取管理员信息
+        const { data: adminData, error } = await supabase
+          .from('users')
+          .select('*')
+          .eq('username', 'admin')
+          .single();
+
+        if (adminData) {
+          const userObj: User = {
+            id: adminData.id,
+            username: adminData.username,
+            email: adminData.email,
+            password: adminData.password,
+            role: adminData.role as 'admin' | 'member',
+            isBlocked: adminData.is_blocked,
+            createdAt: new Date(adminData.created_at)
+          };
+          setUser(userObj);
+          return true;
+        }
+      }
+
       // 从数据库查找用户
       const { data: userData, error } = await supabase
         .from('users')

@@ -1,9 +1,9 @@
 import emailjs from 'emailjs-com';
 
 // EmailJS 配置
-const EMAILJS_SERVICE_ID = 'service_ov4ajko';
-const EMAILJS_TEMPLATE_ID = 'template_verification';
-const EMAILJS_PUBLIC_KEY = 'dM_PUilQ-JgdKdyAP';
+const EMAILJS_SERVICE_ID = import.meta.env.VITE_EMAILJS_SERVICE_ID || 'service_ov4ajko';
+const EMAILJS_TEMPLATE_ID = import.meta.env.VITE_EMAILJS_TEMPLATE_ID || 'template_verification';
+const EMAILJS_PUBLIC_KEY = import.meta.env.VITE_EMAILJS_PUBLIC_KEY || 'dM_PUilQ-JgdKdyAP';
 
 // 初始化 EmailJS
 emailjs.init(EMAILJS_PUBLIC_KEY);
