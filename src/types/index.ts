@@ -21,12 +21,6 @@ export interface Strain {
   addedBy: string;
   addedAt: Date;
   updatedAt: Date;
-  transferReminder?: {
-    enabled: boolean;
-    intervalDays: number;
-    lastTransferDate?: Date;
-    nextReminderDate?: Date;
-  };
 }
 
 export interface Member {

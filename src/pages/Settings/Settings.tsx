@@ -22,7 +22,7 @@ const Settings: React.FC = () => {
               onClick={() => navigate('/lab')}
               className="p-2 hover:bg-white/20 rounded-lg transition-colors"
             >
-              <ArrowLeft size={20} />
+              返回首页
             </button>
             <SettingsIcon size={24} />
             <h1 className="text-xl font-bold">设置</h1>

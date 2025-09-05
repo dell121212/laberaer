@@ -24,12 +24,6 @@ const StrainForm: React.FC<StrainFormProps> = ({ strain, onClose, onSuccess }) =
     location: '',
     description: '',
     addedBy: user?.username || '',
-    transferReminder: {
-      enabled: false,
-      intervalDays: 30,
-      lastTransferDate: undefined,
-      nextReminderDate: undefined
-    }
   });
 
   const [errors, setErrors] = useState<Record<string, string>>({});

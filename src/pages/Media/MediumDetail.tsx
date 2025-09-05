@@ -24,13 +24,19 @@ const MediumDetail: React.FC<MediumDetailProps> = ({ medium, onClose, onEdit }) 
   };
 
   const getStrainName = (strainId: string) => {
-    const strain = strains.find(s => s.id === strainId);
-    return strain ? strain.name : '未知菌种';
+    // 如果strainId实际上是菌种名称，直接返回
+    if (typeof strainId === 'string' && !strainId.includes('-')) {
+      return strainId;
+    }
+    // 否则尝试从strains数组中查找
+    const strain = strains.find(s => s.id === strainId || s.name === strainId);
+    return strain ? strain.name : strainId;
   };
 
   const getStrainType = (strainId: string) => {
-    const strain = strains.find(s => s.id === strainId);
-    return strain ? strain.type : '';
+    // 如果strainId实际上是菌种名称，尝试查找对应的类型
+    const strain = strains.find(s => s.id === strainId || s.name === strainId);
+    return strain ? strain.type : '真菌';
   };
 
   return (

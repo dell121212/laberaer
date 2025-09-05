@@ -18,27 +18,6 @@ const StrainsList: React.FC = () => {
   const [editingStrain, setEditingStrain] = useState(null);
   const [selectedStrain, setSelectedStrain] = useState(null);
   const [showFilters, setShowFilters] = useState(false);
-  const [showReminders, setShowReminders] = useState(false);
-
-  // 检查需要转接提醒的菌种
-  const strainsNeedingReminder = strains.filter(strain => {
-    if (!strain.transferReminder?.enabled) return false;
-    
-    const now = new Date();
-    const lastTransfer = strain.transferReminder.lastTransferDate 
-      ? new Date(strain.transferReminder.lastTransferDate)
-      : new Date(strain.addedAt);
-    
-    const daysSinceLastTransfer = Math.floor((now.getTime() - lastTransfer.getTime()) / (1000 * 60 * 60 * 24));
-    return daysSinceLastTransfer >= strain.transferReminder.intervalDays;
-  });
-
-  // 显示提醒弹窗
-  React.useEffect(() => {
-    if (strainsNeedingReminder.length > 0) {
-      setShowReminders(true);
-    }
-  }, [strainsNeedingReminder.length]);
 
   const strainTypes = [...new Set(strains.map(strain => strain.type))];
 

@@ -18,10 +18,9 @@ const MediaList: React.FC = () => {
   const filteredMedia = media.filter(medium =>
     medium.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
     medium.recommendedBy.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    medium.suitableStrains.some(strainId => {
-      const strain = strains.find(s => s.id === strainId);
-      return strain?.name.toLowerCase().includes(searchQuery.toLowerCase());
-    })
+    medium.suitableStrains.some(strainName => 
+      strainName.toLowerCase().includes(searchQuery.toLowerCase())
+    )
   );
 
   const handleAddMedium = () => {
