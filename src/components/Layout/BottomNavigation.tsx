@@ -3,7 +3,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import { Home, Users, Settings, Activity, Shield } from 'lucide-react';
 
-const BottomNavigation: React.FC = () => {
+export default function BottomNavigation() {
   const navigate = useNavigate();
   const location = useLocation();
   const { user } = useAuth();
@@ -40,6 +40,3 @@ const BottomNavigation: React.FC = () => {
       </div>
     </nav>
   );
-};
-
-export default BottomNavigation;
