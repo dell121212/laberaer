@@ -38,7 +38,7 @@ const AdminPanel: React.FC = () => {
   }, [user, navigate]);
 
   const loadUsers = () => {
-    const savedUsers = JSON.parse(localStorage.getItem('users') || '[]');
+    const savedUsers = JSON.parse(localStorage.getItem('global_users') || '[]');
     setUsers(savedUsers);
   };
 
@@ -51,7 +51,7 @@ const AdminPanel: React.FC = () => {
     if (window.confirm('确定要删除这个用户吗？此操作不可恢复。')) {
       const updatedUsers = users.filter(u => u.id !== userId);
       setUsers(updatedUsers);
-      localStorage.setItem('users', JSON.stringify(updatedUsers));
+      localStorage.setItem('global_users', JSON.stringify(updatedUsers));
     }
   };
 
@@ -62,13 +62,13 @@ const AdminPanel: React.FC = () => {
         : u
     );
     setUsers(updatedUsers);
-    localStorage.setItem('users', JSON.stringify(updatedUsers));
+    localStorage.setItem('global_users', JSON.stringify(updatedUsers));
     
     // 更新当前用户信息（如果修改的是当前用户）
     if (userId === user.id) {
       const updatedCurrentUser = updatedUsers.find(u => u.id === userId);
       if (updatedCurrentUser) {
-        localStorage.setItem('currentUser', JSON.stringify(updatedCurrentUser));
+        localStorage.setItem('current_user', JSON.stringify(updatedCurrentUser));
       }
     }
   };
@@ -80,7 +80,7 @@ const AdminPanel: React.FC = () => {
         : u
     );
     setUsers(updatedUsers);
-    localStorage.setItem('users', JSON.stringify(updatedUsers));
+    localStorage.setItem('global_users', JSON.stringify(updatedUsers));
   };
   const stats = {
     totalUsers: users.length,

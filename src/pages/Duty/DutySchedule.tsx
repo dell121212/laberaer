@@ -53,6 +53,7 @@ const DutySchedule: React.FC = () => {
 
   const handleEditDuty = (duty: any) => {
     setEditingDuty(duty);
+    setSelectedDuty(null); // 关闭详情页面
     setShowForm(true);
   };
 

@@ -1,11 +1,16 @@
 import React from 'react';
 import { useTheme } from '../../contexts/ThemeContext';
+import { useApp } from '../../contexts/AppContext';
 import { useNavigate } from 'react-router-dom';
-import { Settings as SettingsIcon, Sun, Moon, Palette, Info, ArrowLeft } from 'lucide-react';
+import { Settings as SettingsIcon, Sun, Moon, Palette, Info, ArrowLeft, Activity } from 'lucide-react';
+import { format } from 'date-fns';
 
 const Settings: React.FC = () => {
   const { isDark, toggleTheme } = useTheme();
+  const { activityLogs } = useApp();
   const navigate = useNavigate();
+
+  const userLogs = activityLogs.slice(0, 10);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-secondary-50 to-primary-50 dark:from-secondary-900 dark:to-secondary-800 pb-20 transition-colors duration-300">

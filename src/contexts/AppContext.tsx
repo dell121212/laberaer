@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import { useAuth } from './AuthContext';
 import { exportToExcel, importFromExcel, downloadTemplate as downloadExcelTemplate } from '../utils/excelUtils';
 import { 
   Strain, 
@@ -10,6 +11,15 @@ import {
   AppContextType 
 } from '../types';
 
+// 全局数据存储键
+const GLOBAL_DATA_KEYS = {
+  strains: 'global_strains',
+  members: 'global_members',
+  dutySchedules: 'global_dutySchedules',
+  media: 'global_media',
+  theses: 'global_theses',
+  activityLogs: 'global_activityLogs'
+};
 const AppContext = createContext<AppContextType | undefined>(undefined);
 
 export const useApp = () => {
@@ -25,6 +35,8 @@ interface AppProviderProps {
 }
 
 export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
+  const { user } = useAuth();
+  
   // State management
   const [strains, setStrains] = useState<Strain[]>([]);
   const [members, setMembers] = useState<Member[]>([]);
@@ -37,12 +49,12 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
   useEffect(() => {
     const loadData = () => {
       try {
-        const savedStrains = localStorage.getItem('strains');
-        const savedMembers = localStorage.getItem('members');
-        const savedDutySchedules = localStorage.getItem('dutySchedules');
-        const savedMedia = localStorage.getItem('media');
-        const savedTheses = localStorage.getItem('theses');
-        const savedActivityLogs = localStorage.getItem('activityLogs');
+        const savedStrains = localStorage.getItem(GLOBAL_DATA_KEYS.strains);
+        const savedMembers = localStorage.getItem(GLOBAL_DATA_KEYS.members);
+        const savedDutySchedules = localStorage.getItem(GLOBAL_DATA_KEYS.dutySchedules);
+        const savedMedia = localStorage.getItem(GLOBAL_DATA_KEYS.media);
+        const savedTheses = localStorage.getItem(GLOBAL_DATA_KEYS.theses);
+        const savedActivityLogs = localStorage.getItem(GLOBAL_DATA_KEYS.activityLogs);
 
         if (savedStrains) {
           const parsedStrains = JSON.parse(savedStrains);
@@ -101,35 +113,35 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
 
   // Save data to localStorage whenever state changes
   useEffect(() => {
-    localStorage.setItem('strains', JSON.stringify(strains));
+    localStorage.setItem(GLOBAL_DATA_KEYS.strains, JSON.stringify(strains));
   }, [strains]);
 
   useEffect(() => {
-    localStorage.setItem('members', JSON.stringify(members));
+    localStorage.setItem(GLOBAL_DATA_KEYS.members, JSON.stringify(members));
   }, [members]);
 
   useEffect(() => {
-    localStorage.setItem('dutySchedules', JSON.stringify(dutySchedules));
+    localStorage.setItem(GLOBAL_DATA_KEYS.dutySchedules, JSON.stringify(dutySchedules));
   }, [dutySchedules]);
 
   useEffect(() => {
-    localStorage.setItem('media', JSON.stringify(media));
+    localStorage.setItem(GLOBAL_DATA_KEYS.media, JSON.stringify(media));
   }, [media]);
 
   useEffect(() => {
-    localStorage.setItem('theses', JSON.stringify(theses));
+    localStorage.setItem(GLOBAL_DATA_KEYS.theses, JSON.stringify(theses));
   }, [theses]);
 
   useEffect(() => {
-    localStorage.setItem('activityLogs', JSON.stringify(activityLogs));
+    localStorage.setItem(GLOBAL_DATA_KEYS.activityLogs, JSON.stringify(activityLogs));
   }, [activityLogs]);
 
   // Helper function to add activity log
   const logActivity = (action: string, module: string, details: string) => {
     const newLog: ActivityLog = {
       id: Date.now().toString(),
-      userId: 'current-user',
-      username: 'Current User',
+      userId: user?.id || 'unknown',
+      username: user?.username || 'Unknown User',
       action,
       module,
       details,
@@ -151,8 +163,7 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
   };
 
   const updateStrain = (id: string, strain: Partial<Strain>) => {
-    const currentUser = JSON.parse(localStorage.getItem('currentUser') || '{}');
-    if (currentUser.role !== 'admin') {
+    if (user?.role !== 'admin') {
       alert('只有管理员可以编辑菌种信息');
       return;
     }
@@ -161,8 +172,7 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
   };
 
   const deleteStrain = (id: string) => {
-    const currentUser = JSON.parse(localStorage.getItem('currentUser') || '{}');
-    if (currentUser.role !== 'admin') {
+    if (user?.role !== 'admin') {
       alert('只有管理员可以删除菌种');
       return;
     }
@@ -184,8 +194,7 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
   };
 
   const updateMember = (id: string, member: Partial<Member>) => {
-    const currentUser = JSON.parse(localStorage.getItem('currentUser') || '{}');
-    if (currentUser.role !== 'admin') {
+    if (user?.role !== 'admin') {
       alert('只有管理员可以编辑成员信息');
       return;
     }
@@ -194,8 +203,7 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
   };
 
   const deleteMember = (id: string) => {
-    const currentUser = JSON.parse(localStorage.getItem('currentUser') || '{}');
-    if (currentUser.role !== 'admin') {
+    if (user?.role !== 'admin') {
       alert('只有管理员可以删除成员');
       return;
     }
@@ -217,8 +225,7 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
   };
 
   const updateDutySchedule = (id: string, schedule: Partial<DutySchedule>) => {
-    const currentUser = JSON.parse(localStorage.getItem('currentUser') || '{}');
-    if (currentUser.role !== 'admin') {
+    if (user?.role !== 'admin') {
       alert('只有管理员可以编辑值日安排');
       return;
     }
@@ -227,8 +234,7 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
   };
 
   const deleteDutySchedule = (id: string) => {
-    const currentUser = JSON.parse(localStorage.getItem('currentUser') || '{}');
-    if (currentUser.role !== 'admin') {
+    if (user?.role !== 'admin') {
       alert('只有管理员可以删除值日安排');
       return;
     }
@@ -257,8 +263,7 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
   };
 
   const updateMedium = (id: string, medium: Partial<Medium>) => {
-    const currentUser = JSON.parse(localStorage.getItem('currentUser') || '{}');
-    if (currentUser.role !== 'admin') {
+    if (user?.role !== 'admin') {
       alert('只有管理员可以编辑培养基信息');
       return;
     }
@@ -267,8 +272,7 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
   };
 
   const deleteMedium = (id: string) => {
-    const currentUser = JSON.parse(localStorage.getItem('currentUser') || '{}');
-    if (currentUser.role !== 'admin') {
+    if (user?.role !== 'admin') {
       alert('只有管理员可以删除培养基');
       return;
     }
@@ -290,8 +294,7 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
   };
 
   const updateThesis = (id: string, thesis: Partial<Thesis>) => {
-    const currentUser = JSON.parse(localStorage.getItem('currentUser') || '{}');
-    if (currentUser.role !== 'admin') {
+    if (user?.role !== 'admin') {
       alert('只有管理员可以编辑论文信息');
       return;
     }
@@ -300,8 +303,7 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
   };
 
   const deleteThesis = (id: string) => {
-    const currentUser = JSON.parse(localStorage.getItem('currentUser') || '{}');
-    if (currentUser.role !== 'admin') {
+    if (user?.role !== 'admin') {
       alert('只有管理员可以删除论文');
       return;
     }

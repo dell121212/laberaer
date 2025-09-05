@@ -27,6 +27,7 @@ const MembersList: React.FC = () => {
 
   const handleEditMember = (member: any) => {
     setEditingMember(member);
+    setSelectedMember(null); // 关闭详情页面
     setShowForm(true);
   };
 

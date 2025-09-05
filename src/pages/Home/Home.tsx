@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useApp } from '../../contexts/AppContext';
 import { useAuth } from '../../contexts/AuthContext';
 import { useTheme } from '../../contexts/ThemeContext';
-import { useNavigate } from 'react-router-dom';
 import SearchBar from '../../components/Common/SearchBar';
 import { 
   Beaker, 
@@ -23,6 +23,7 @@ import {
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { zhCN } from 'date-fns/locale';
+import DutyReminderModal from '../components/DutyReminderModal';
 
 const Home: React.FC = () => {
   const { strains, members, dutySchedules, media, theses, activityLogs } = useApp();
@@ -30,7 +31,30 @@ const Home: React.FC = () => {
   const { isDark, toggleTheme } = useTheme();
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState('');
+  const [showDutyReminder, setShowDutyReminder] = useState(false);
 
+  // 检查用户是否在成员名单中
+  React.useEffect(() => {
+    if (user) {
+      const userInMembers = members.find(member => member.name === user.username);
+      if (!userInMembers) {
+        alert('您不在成员名单中，请联系管理员添加您的信息');
+        navigate('/members');
+        return;
+      }
+
+      // 检查今日值日安排
+      const today = new Date();
+      const todayDuty = dutySchedules.find(schedule => 
+        schedule.date === format(today, 'yyyy-MM-dd') && 
+        schedule.members.includes(user.username)
+      );
+
+      if (todayDuty && todayDuty.status === 'pending') {
+        setShowDutyReminder(true);
+      }
+    }
+  }, [user, members, dutySchedules, navigate]);
   const today = new Date();
   const todayDuty = dutySchedules.find(schedule => 
     schedule.date === format(today, 'yyyy-MM-dd')
@@ -248,6 +272,17 @@ const Home: React.FC = () => {
           </div>
         )}
 
+
+      {/* 值日提醒弹窗 */}
+      {showDutyReminder && (
+        <DutyReminderModal
+          onClose={() => setShowDutyReminder(false)}
+          dutySchedule={dutySchedules.find(schedule => 
+            schedule.date === format(new Date(), 'yyyy-MM-dd') && 
+            schedule.members.includes(user?.username || '')
+          )}
+        />
+      )}
         {/* Quick Stats */}
         <div className="mb-6 sm:mb-8">
           {/* Admin Panel Link */}

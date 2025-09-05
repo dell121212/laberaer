@@ -56,6 +56,7 @@ const StrainsList: React.FC = () => {
 
   const handleEditStrain = (strain: any) => {
     setEditingStrain(strain);
+    setSelectedStrain(null); // 关闭详情页面
     setShowForm(true);
   };
 

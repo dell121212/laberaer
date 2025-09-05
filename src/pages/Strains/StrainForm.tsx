@@ -7,9 +7,10 @@ import { Strain } from '../../types';
 interface StrainFormProps {
   strain?: Strain;
   onClose: () => void;
+  onSuccess?: () => void;
 }
 
-const StrainForm: React.FC<StrainFormProps> = ({ strain, onClose }) => {
+const StrainForm: React.FC<StrainFormProps> = ({ strain, onClose, onSuccess }) => {
   const { user } = useAuth();
   const { downloadTemplate, addStrain, updateStrain } = useApp();
   
@@ -83,6 +84,7 @@ const StrainForm: React.FC<StrainFormProps> = ({ strain, onClose }) => {
       } else {
         addStrain(formData);
       }
+      onSuccess?.();
       onClose();
     }
   };

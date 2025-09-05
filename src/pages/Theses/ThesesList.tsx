@@ -31,6 +31,7 @@ const ThesesList: React.FC = () => {
 
   const handleEditThesis = (thesis: any) => {
     setEditingThesis(thesis);
+    setSelectedThesis(null); // 关闭详情页面
     setShowForm(true);
   };
 

@@ -31,6 +31,7 @@ const MediaList: React.FC = () => {
 
   const handleEditMedium = (medium: any) => {
     setEditingMedium(medium);
+    setSelectedMedium(null); // 关闭详情页面
     setShowForm(true);
   };
 

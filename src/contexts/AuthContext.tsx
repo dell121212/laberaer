@@ -2,6 +2,22 @@ import React, { createContext, useContext, useState, useEffect, ReactNode } from
 import { validateEmail, generateVerificationCode, sendVerificationEmail, storeVerificationCode, verifyCode } from '../utils/emailValidation';
 import { User, AuthContextType } from '../types';
 
+// 创建全局用户存储
+const GLOBAL_USERS_KEY = 'global_users';
+const CURRENT_USER_KEY = 'current_user';
+
+const getGlobalUsers = (): User[] => {
+  try {
+    const users = localStorage.getItem(GLOBAL_USERS_KEY);
+    return users ? JSON.parse(users) : [];
+  } catch {
+    return [];
+  }
+};
+
+const setGlobalUsers = (users: User[]) => {
+  localStorage.setItem(GLOBAL_USERS_KEY, JSON.stringify(users));
+};
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
@@ -14,19 +30,19 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   } | null>(null);
 
   useEffect(() => {
-    const savedUser = localStorage.getItem('currentUser');
+    const savedUser = localStorage.getItem(CURRENT_USER_KEY);
     if (savedUser) {
       setUser(JSON.parse(savedUser));
     }
   }, []);
 
   const login = async (username: string, password: string): Promise<boolean> => {
-    const users = JSON.parse(localStorage.getItem('users') || '[]');
+    const users = getGlobalUsers();
     const foundUser = users.find((u: User) => u.username === username && u.password === password);
     
     if (foundUser && !foundUser.isBlocked) {
       setUser(foundUser);
-      localStorage.setItem('currentUser', JSON.stringify(foundUser));
+      localStorage.setItem(CURRENT_USER_KEY, JSON.stringify(foundUser));
       return true;
     } else if (foundUser && foundUser.isBlocked) {
       throw new Error('账户已被限制登录，请联系管理员');
@@ -54,7 +70,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       return { success: false, message: '邮箱格式不正确' };
     }
     
-    const users = JSON.parse(localStorage.getItem('users') || '[]');
+    const users = getGlobalUsers();
     
     if (users.some((u: User) => u.username === username)) {
       return { success: false, message: '用户名已存在' };
@@ -90,14 +106,14 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     };
 
     users.push(newUser);
-    localStorage.setItem('users', JSON.stringify(users));
+    setGlobalUsers(users);
     setPendingRegistration(null);
     return { success: true, message: '注册成功' };
   };
 
   const logout = () => {
     setUser(null);
-    localStorage.removeItem('currentUser');
+    localStorage.removeItem(CURRENT_USER_KEY);
   };
 
   const completePendingRegistration = async (verificationCode: string): Promise<{ success: boolean; message: string }> => {
