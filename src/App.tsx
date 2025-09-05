@@ -29,7 +29,7 @@ const AppContent: React.FC = () => {
       <Routes>
         <Route path="/login" element={!user ? <Login /> : <Navigate to="/home" replace />} />
         <Route 
-          path="/lab" 
+          path="/home" 
           element={
             <ProtectedRoute>
               <Home />
@@ -108,7 +108,8 @@ const AppContent: React.FC = () => {
             </ProtectedRoute>
           } 
         />
-        <Route path="/" element={<Navigate to="/lab" replace />} />
+        <Route path="/" element={<Navigate to="/home" replace />} />
+        <Route path="/lab" element={<Navigate to="/home" replace />} />
       </Routes>
       
       {user && <BottomNavigation />}

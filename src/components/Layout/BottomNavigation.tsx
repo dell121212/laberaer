@@ -9,7 +9,7 @@ const BottomNavigation: React.FC = () => {
   const { user } = useAuth();
 
   const navItems = [
-    { path: '/lab', icon: Home, label: '实验室' },
+    { path: '/home', icon: Home, label: '实验室' },
     { path: '/profile', icon: Users, label: '我的' },
     { path: '/settings', icon: Settings, label: '设置' },
   ];
