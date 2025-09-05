@@ -224,15 +224,6 @@ const Login: React.FC = () => {
               </p>
             </div>
           )}
-          
-          {/* 管理员登录提示 */}
-          {isLogin && (
-            <div className="mt-4 p-3 bg-green-50 border border-green-200 rounded-lg">
-              <p className="text-sm text-green-700">
-                🔑 管理员账户：用户名 <strong>admin</strong>，密码 <strong>admin</strong>
-              </p>
-            </div>
-          )}
         </div>
 
         <div className="text-center mb-8">

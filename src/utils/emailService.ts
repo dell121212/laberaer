@@ -22,34 +22,35 @@ export const generateVerificationCode = (): string => {
 // 发送验证邮件
 export const sendVerificationEmail = async (email: string, code: string, username: string): Promise<boolean> => {
   try {
-    // 在开发环境或EmailJS未配置时显示验证码用于测试
-    console.log(`验证码: ${code} (发送给: ${email})`);
-    alert(`测试模式 - 验证码: ${code}\n\n邮箱: ${email}\n\n请使用此验证码完成注册`);
-    return true;
+    // 检查EmailJS配置
+    if (!EMAILJS_SERVICE_ID || !EMAILJS_TEMPLATE_ID || !EMAILJS_PUBLIC_KEY ||
+        EMAILJS_SERVICE_ID === 'service_ov4ajko' ||
+        EMAILJS_TEMPLATE_ID === 'template_verification' ||
+        EMAILJS_PUBLIC_KEY === 'dM_PUilQ-JgdKdyAP') {
+      // 在开发环境或EmailJS未配置时显示验证码用于测试
+      console.log(`验证码: ${code} (发送给: ${email})`);
+      alert(`测试模式 - 验证码: ${code}\n\n邮箱: ${email}\n\n请使用此验证码完成注册`);
+      return true;
+    }
 
     // 尝试发送真实邮件（如果EmailJS配置正确）
-    try {
-      const templateParams = {
-        to_email: email,
-        to_name: username,
-        verification_code: code,
-        from_name: '韶关学院食用菌创新团队',
-        message: `您的验证码是：${code}，有效期为5分钟。请勿将验证码告诉他人。`,
-        reply_to: 'noreply@sgxy.edu.cn'
-      };
+    const templateParams = {
+      to_email: email,
+      to_name: username,
+      verification_code: code,
+      from_name: '韶关学院食用菌创新团队',
+      message: `您的验证码是：${code}，有效期为5分钟。请勿将验证码告诉他人。`,
+      reply_to: 'noreply@sgxy.edu.cn'
+    };
 
-      const response = await emailjs.send(
-        EMAILJS_SERVICE_ID,
-        EMAILJS_TEMPLATE_ID,
-        templateParams
-      );
+    const response = await emailjs.send(
+      EMAILJS_SERVICE_ID,
+      EMAILJS_TEMPLATE_ID,
+      templateParams
+    );
 
-      console.log('邮件发送成功:', response);
-      return response.status === 200;
-    } catch (emailError) {
-      console.warn('EmailJS发送失败，使用测试模式:', emailError);
-      return true; // 测试模式下总是返回成功
-    }
+    console.log('邮件发送成功:', response);
+    return response.status === 200;
   } catch (error) {
     console.error('邮件发送失败:', error);
     // 发生错误时也使用测试模式
