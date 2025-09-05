@@ -81,23 +81,34 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     try {
       console.log('尝试登录:', { username, password }); // 调试日志
       
+      // 检查Supabase配置
+      if (!import.meta.env.VITE_SUPABASE_URL || !import.meta.env.VITE_SUPABASE_ANON_KEY) {
+        console.error('Supabase配置缺失');
+        throw new Error('系统配置错误，请联系管理员');
+      }
+
       // 从数据库查找用户
       const { data: userData, error } = await supabase
         .from('users')
         .select('*')
-        .eq('username', username)
+        .eq('username', username.trim())
         .single();
 
       console.log('数据库查询结果:', { userData, error }); // 调试日志
 
       if (error || !userData) {
-        console.log('用户不存在或查询失败');
+        console.log('用户不存在或查询失败:', error);
+        if (error?.code === 'PGRST116') {
+          console.log('用户不存在');
+          return false;
+        }
+        throw new Error(`数据库查询失败: ${error?.message || '未知错误'}`);
         return false;
       }
 
       // 验证密码
       console.log('验证密码:', { inputPassword: password, storedPassword: userData.password });
-      if (userData.password !== password) {
+      if (userData.password !== password.trim()) {
         console.log('密码不匹配');
         return false;
       }

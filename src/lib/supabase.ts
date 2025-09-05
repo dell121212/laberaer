@@ -3,19 +3,28 @@ import { createClient } from '@supabase/supabase-js'
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL
 const supabaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY
 
-let supabase
-
-if (!supabaseUrl || !supabaseKey) {
-  console.warn('Supabase environment variables not configured. Using placeholder values.')
-  // 使用占位符避免应用崩溃
-  const placeholderUrl = 'https://placeholder.supabase.co'
-  const placeholderKey = 'placeholder-key'
-  supabase = createClient(placeholderUrl, placeholderKey)
-} else {
-  supabase = createClient(supabaseUrl, supabaseKey)
+// 检查环境变量
+if (!supabaseUrl || !supabaseKey || 
+    supabaseUrl === 'https://your-project-ref.supabase.co' ||
+    supabaseKey === 'your-anon-key-here') {
+  console.error('Supabase environment variables not configured properly');
+  console.log('Current URL:', supabaseUrl);
+  console.log('Current Key exists:', !!supabaseKey);
 }
 
-export { supabase }
+// 创建Supabase客户端，添加正确的配置
+export const supabase = createClient(supabaseUrl || '', supabaseKey || '', {
+  auth: {
+    persistSession: false, // 禁用会话持久化，我们使用自己的认证
+    autoRefreshToken: false,
+  },
+  global: {
+    headers: {
+      'Accept': 'application/json',
+      'Content-Type': 'application/json',
+    }
+  }
+});
 
 // 数据库表结构
 export interface Database {

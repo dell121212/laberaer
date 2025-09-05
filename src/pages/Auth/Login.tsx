@@ -313,9 +313,11 @@ const Login: React.FC = () => {
           {error && (
             <div className="text-error-600 text-sm bg-error-50 p-3 rounded-xl border border-error-200 animate-slide-up">
               ❌ {error}
-              <div className="mt-2 text-xs text-error-500">
-                调试信息：请检查浏览器控制台查看详细错误
-              </div>
+              {error.includes('系统配置') && (
+                <div className="mt-2 text-xs text-error-500">
+                  请确保Supabase环境变量已正确配置
+                </div>
+              )}
             </div>
           )}
 
