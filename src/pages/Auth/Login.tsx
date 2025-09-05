@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
-import { LogIn, UserPlus } from 'lucide-react';
+import { LogIn, UserPlus, ChevronLeft, ChevronRight } from 'lucide-react';
 
 const Login: React.FC = () => {
   const [isLogin, setIsLogin] = useState(true);
@@ -14,9 +14,34 @@ const Login: React.FC = () => {
   const [success, setSuccess] = useState('');
   const [loading, setLoading] = useState(false);
   const [resendCooldown, setResendCooldown] = useState(0);
+  const [currentSlide, setCurrentSlide] = useState(0);
   
   const { login, register, completePendingRegistration, pendingRegistration, sendVerificationCode } = useAuth();
   const navigate = useNavigate();
+
+  // 团队展示图片（模拟数据，后续可替换为真实图片）
+  const teamSlides = [
+    {
+      image: 'https://images.pexels.com/photos/2280549/pexels-photo-2280549.jpeg?auto=compress&cs=tinysrgb&w=800',
+      title: '实验室环境',
+      description: '现代化的实验设备和舒适的研究环境'
+    },
+    {
+      image: 'https://images.pexels.com/photos/3735747/pexels-photo-3735747.jpeg?auto=compress&cs=tinysrgb&w=800',
+      title: '团队合作',
+      description: '专业的研究团队，致力于食用菌创新研究'
+    },
+    {
+      image: 'https://images.pexels.com/photos/2280571/pexels-photo-2280571.jpeg?auto=compress&cs=tinysrgb&w=800',
+      title: '科研成果',
+      description: '丰富的研究成果和学术论文发表'
+    },
+    {
+      image: 'https://images.pexels.com/photos/1366919/pexels-photo-1366919.jpeg?auto=compress&cs=tinysrgb&w=800',
+      title: '菌种培养',
+      description: '专业的菌种保藏和培养技术'
+    }
+  ];
 
   // 重发验证码冷却计时器
   React.useEffect(() => {
@@ -28,6 +53,14 @@ const Login: React.FC = () => {
     }
   }, [resendCooldown]);
 
+  // 自动轮播
+  React.useEffect(() => {
+    const timer = setInterval(() => {
+      setCurrentSlide((prev) => (prev + 1) % teamSlides.length);
+    }, 4000);
+    return () => clearInterval(timer);
+  }, [teamSlides.length]);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
@@ -37,7 +70,7 @@ const Login: React.FC = () => {
       if (isLogin) {
         const success = await login(username, password);
         if (success) {
-          navigate('/home');
+          navigate('/lab');
         } else {
           setError('用户名或密码错误');
         }
@@ -102,6 +135,14 @@ const Login: React.FC = () => {
     }
   };
 
+  const nextSlide = () => {
+    setCurrentSlide((prev) => (prev + 1) % teamSlides.length);
+  };
+
+  const prevSlide = () => {
+    setCurrentSlide((prev) => (prev - 1 + teamSlides.length) % teamSlides.length);
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-primary-50 via-secondary-50 to-primary-100 flex items-center justify-center p-4 relative overflow-hidden">
       {/* 背景装饰 */}
@@ -111,17 +152,58 @@ const Login: React.FC = () => {
         <div className="absolute top-1/2 left-1/2 w-60 h-60 bg-gradient-to-r from-purple-100 to-pink-100 rounded-full mix-blend-multiply filter blur-2xl opacity-50 animate-float" style={{ animationDelay: '4s' }}></div>
       </div>
       
-      <div className="modern-card w-full max-w-md lg:max-w-lg p-6 lg:p-8 animate-bounce-in relative z-10 shadow-2xl">
-        {/* 实验室宣传图 */}
+      <div className="modern-card w-full max-w-md lg:max-w-2xl p-6 lg:p-8 animate-bounce-in relative z-10 shadow-2xl">
+        {/* 团队展示轮播 */}
         <div className="text-center mb-6 lg:mb-8">
-          <div className="w-24 h-24 lg:w-32 lg:h-32 mx-auto mb-4 relative">
-            <img 
-              src="https://images.pexels.com/photos/2280549/pexels-photo-2280549.jpeg?auto=compress&cs=tinysrgb&w=400" 
-              alt="实验室"
-              className="w-full h-full object-cover rounded-2xl shadow-lg"
-            />
-            <div className="absolute inset-0 bg-gradient-to-t from-primary-600/20 to-transparent rounded-2xl"></div>
+          <div className="relative w-full h-48 lg:h-64 mx-auto mb-4 rounded-2xl overflow-hidden shadow-lg">
+            <div 
+              className="flex transition-transform duration-500 ease-in-out h-full"
+              style={{ transform: `translateX(-${currentSlide * 100}%)` }}
+            >
+              {teamSlides.map((slide, index) => (
+                <div key={index} className="w-full h-full flex-shrink-0 relative">
+                  <img 
+                    src={slide.image}
+                    alt={slide.title}
+                    className="w-full h-full object-cover"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent"></div>
+                  <div className="absolute bottom-4 left-4 right-4 text-white">
+                    <h3 className="text-lg font-bold mb-1">{slide.title}</h3>
+                    <p className="text-sm opacity-90">{slide.description}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+            
+            {/* 轮播控制按钮 */}
+            <button
+              onClick={prevSlide}
+              className="absolute left-2 top-1/2 transform -translate-y-1/2 bg-white/20 hover:bg-white/30 text-white p-2 rounded-full transition-colors"
+            >
+              <ChevronLeft size={20} />
+            </button>
+            <button
+              onClick={nextSlide}
+              className="absolute right-2 top-1/2 transform -translate-y-1/2 bg-white/20 hover:bg-white/30 text-white p-2 rounded-full transition-colors"
+            >
+              <ChevronRight size={20} />
+            </button>
+            
+            {/* 轮播指示器 */}
+            <div className="absolute bottom-2 left-1/2 transform -translate-x-1/2 flex gap-2">
+              {teamSlides.map((_, index) => (
+                <button
+                  key={index}
+                  onClick={() => setCurrentSlide(index)}
+                  className={`w-2 h-2 rounded-full transition-colors ${
+                    index === currentSlide ? 'bg-white' : 'bg-white/50'
+                  }`}
+                />
+              ))}
+            </div>
           </div>
+          
           <h1 className="text-2xl lg:text-3xl font-bold gradient-text mb-2 animate-slide-in-left">🏫 韶关学院</h1>
           <h2 className="text-lg lg:text-xl font-semibold text-secondary-800 mb-2 animate-slide-in-right">🍄 食用菌创新团队</h2>
           <p className="text-sm lg:text-base text-secondary-600">🔬 科研创新 · 🤝 团队协作 · 📚 知识传承</p>
