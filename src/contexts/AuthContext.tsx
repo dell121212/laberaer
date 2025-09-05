@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import { supabase } from '../lib/supabase';
 import { 
   validateEmail, 
   generateVerificationCode, 
@@ -15,7 +16,6 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     username: string;
     email: string;
     password: string;
-    verificationCode: string;
   } | null>(null);
 
   // 初始化时检查本地存储的用户信息
@@ -32,81 +32,96 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     }
   }, []);
 
-  // 获取所有用户数据
-  const getAllUsers = (): User[] => {
+  // 确保管理员账户存在
+  const ensureAdminExists = async () => {
     try {
-      const users = localStorage.getItem('global_users');
-      return users ? JSON.parse(users) : [];
+      // 检查管理员是否存在
+      const { data: existingAdmin, error: checkError } = await supabase
+        .from('users')
+        .select('*')
+        .eq('username', 'admin')
+        .single();
+
+      if (checkError && checkError.code === 'PGRST116') {
+        // 管理员不存在，创建管理员账户
+        console.log('创建管理员账户...');
+        const { data: newAdmin, error: createError } = await supabase
+          .from('users')
+          .insert({
+            username: 'admin',
+            email: 'admin@sgxy.edu.cn',
+            password: 'admin',
+            role: 'admin'
+          })
+          .select()
+          .single();
+
+        if (createError) {
+          console.error('创建管理员失败:', createError);
+        } else {
+          console.log('管理员账户创建成功:', newAdmin);
+        }
+      } else if (existingAdmin) {
+        console.log('管理员账户已存在:', existingAdmin);
+      }
     } catch (error) {
-      console.error('Failed to get users:', error);
-      return [];
+      console.error('检查管理员账户时出错:', error);
     }
   };
 
-  // 保存用户数据
-  const saveUser = (userData: User) => {
-    const users = getAllUsers();
-    const existingIndex = users.findIndex(u => u.id === userData.id);
-    
-    if (existingIndex >= 0) {
-      users[existingIndex] = userData;
-    } else {
-      users.push(userData);
-    }
-    
-    localStorage.setItem('global_users', JSON.stringify(users));
-  };
-
-  // 初始化管理员账户
-  const initializeAdmin = () => {
-    const users = getAllUsers();
-    const adminExists = users.find(u => u.username === 'admin');
-    
-    if (!adminExists) {
-      const adminUser: User = {
-        id: 'admin-001',
-        username: 'admin',
-        email: 'admin@sgxy.edu.cn',
-        password: 'admin',
-        role: 'admin',
-        isBlocked: false,
-        createdAt: new Date()
-      };
-      
-      saveUser(adminUser);
-      console.log('管理员账户已创建');
-    }
-  };
-
-  // 初始化时创建管理员账户
+  // 初始化时确保管理员存在
   useEffect(() => {
-    initializeAdmin();
+    ensureAdminExists();
   }, []);
 
   const login = async (username: string, password: string): Promise<boolean> => {
     try {
-      console.log('尝试登录:', { username, password });
+      console.log('尝试登录:', { username });
       
-      const users = getAllUsers();
-      const user = users.find(u => u.username.trim() === username.trim());
-      
-      console.log('找到用户:', user);
-      
-      if (!user) {
-        console.log('用户不存在');
+      // 查询用户
+      const { data: userData, error } = await supabase
+        .from('users')
+        .select('*')
+        .eq('username', username.trim())
+        .single();
+
+      console.log('数据库查询结果:', { userData, error });
+
+      if (error) {
+        if (error.code === 'PGRST116') {
+          console.log('用户不存在');
+          return false;
+        }
+        console.error('数据库查询错误:', error);
         return false;
       }
 
-      if (user.password !== password.trim()) {
+      if (!userData) {
+        console.log('用户数据为空');
+        return false;
+      }
+
+      if (userData.password !== password.trim()) {
         console.log('密码错误');
         return false;
       }
 
-      if (user.isBlocked) {
+      if (userData.is_blocked) {
         throw new Error('账户已被限制登录，请联系管理员');
       }
 
-      console.log('登录成功');
+      // 转换数据格式
+      const user: User = {
+        id: userData.id,
+        username: userData.username,
+        email: userData.email,
+        password: userData.password,
+        role: userData.role,
+        isBlocked: userData.is_blocked || false,
+        createdAt: new Date(userData.created_at)
+      };
+
+      console.log('登录成功:', user);
       setUser(user);
       localStorage.setItem('current_user', JSON.stringify(user));
       return true;
@@ -144,16 +159,24 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         return { success: false, message: '邮箱格式不正确' };
       }
       
-      const users = getAllUsers();
-      
       // 检查用户名是否已存在
-      const existingUser = users.find(u => u.username === username);
+      const { data: existingUser } = await supabase
+        .from('users')
+        .select('username')
+        .eq('username', username)
+        .single();
+
       if (existingUser) {
         return { success: false, message: '用户名已存在' };
       }
 
       // 检查邮箱是否已存在
-      const existingEmail = users.find(u => u.email === email);
+      const { data: existingEmail } = await supabase
+        .from('users')
+        .select('email')
+        .eq('email', email)
+        .single();
+
       if (existingEmail) {
         return { success: false, message: '该邮箱已被注册' };
       }
@@ -162,7 +185,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       if (!verificationCode) {
         const codeSent = await sendVerificationCode(email);
         if (codeSent) {
-          setPendingRegistration({ username, email, password, verificationCode: '' });
+          setPendingRegistration({ username, email, password });
           return { success: false, needsVerification: true, message: '验证码已发送到您的邮箱' };
         } else {
           return { success: false, message: '验证码发送失败，请重试' };
@@ -175,18 +198,20 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         return { success: false, message: verifyResult.message };
       }
 
-      // 创建新用户
-      const newUser: User = {
-        id: `user-${Date.now()}`,
-        username,
-        email,
-        password,
-        role: 'member',
-        isBlocked: false,
-        createdAt: new Date()
-      };
+      // 创建新用户 - 使用 RPC 函数绕过 RLS
+      const { data: newUser, error } = await supabase
+        .rpc('create_user', {
+          p_username: username,
+          p_email: email,
+          p_password: password,
+          p_role: 'member'
+        });
 
-      saveUser(newUser);
+      if (error) {
+        console.error('注册错误:', error);
+        return { success: false, message: '注册失败，请重试' };
+      }
+
       setPendingRegistration(null);
       return { success: true, message: '注册成功' };
     } catch (error) {
