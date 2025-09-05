@@ -61,14 +61,16 @@ VITE_SUPABASE_ANON_KEY=your_supabase_anon_key
 ```
 
 ### 邮件服务配置
-1. 注册 [EmailJS](https://www.emailjs.com/) 账户
-2. 创建邮件服务和模板
-3. 在 `src/utils/emailService.ts` 中配置：
-```typescript
-const EMAILJS_SERVICE_ID = 'your_service_id';
-const EMAILJS_TEMPLATE_ID = 'your_template_id';
-const EMAILJS_PUBLIC_KEY = 'your_public_key';
-```
+邮件服务已配置完成，使用EmailJS发送真实验证码：
+- **Service ID**: service_ov4ajko
+- **Public Key**: dM_PUilQ-JgdKdyAP
+- **Template**: 需要在EmailJS控制台创建邮件模板
+
+**邮件模板变量**：
+- `{{to_name}}` - 收件人姓名
+- `{{verification_code}}` - 验证码
+- `{{from_name}}` - 发件人名称
+- `{{message}}` - 邮件内容
 
 ### 启动开发服务器
 ```bash

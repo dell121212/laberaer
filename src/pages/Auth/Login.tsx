@@ -215,6 +215,15 @@ const Login: React.FC = () => {
           <h1 className="text-2xl lg:text-3xl font-bold gradient-text mb-2 animate-slide-in-left">🏫 韶关学院</h1>
           <h2 className="text-lg lg:text-xl font-semibold text-secondary-800 mb-2 animate-slide-in-right">🍄 食用菌创新团队</h2>
           <p className="text-sm lg:text-base text-secondary-600">🔬 科研创新 · 🤝 团队协作 · 📚 知识传承</p>
+          
+          {/* 邮箱验证提示 */}
+          {!isLogin && (
+            <div className="mt-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+              <p className="text-sm text-blue-700">
+                📧 注册需要邮箱验证，请确保邮箱地址正确
+              </p>
+            </div>
+          )}
         </div>
 
         <div className="text-center mb-8">

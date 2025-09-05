@@ -1,9 +1,9 @@
 import emailjs from 'emailjs-com';
 
 // EmailJS 配置
-const EMAILJS_SERVICE_ID = 'service_sgxy_lab';
+const EMAILJS_SERVICE_ID = 'service_ov4ajko';
 const EMAILJS_TEMPLATE_ID = 'template_verification';
-const EMAILJS_PUBLIC_KEY = 'your_public_key_here';
+const EMAILJS_PUBLIC_KEY = 'dM_PUilQ-JgdKdyAP';
 
 // 初始化 EmailJS
 emailjs.init(EMAILJS_PUBLIC_KEY);
@@ -27,7 +27,8 @@ export const sendVerificationEmail = async (email: string, code: string, usernam
       to_name: username,
       verification_code: code,
       from_name: '韶关学院食用菌创新团队',
-      message: `您的验证码是：${code}，有效期为5分钟。请勿将验证码告诉他人。`
+      message: `您的验证码是：${code}，有效期为5分钟。请勿将验证码告诉他人。`,
+      reply_to: 'noreply@sgxy.edu.cn'
     };
 
     const response = await emailjs.send(
@@ -40,10 +41,7 @@ export const sendVerificationEmail = async (email: string, code: string, usernam
     return response.status === 200;
   } catch (error) {
     console.error('邮件发送失败:', error);
-    
-    // 如果EmailJS服务不可用，显示验证码供测试使用
-    alert(`邮件服务暂时不可用，测试用验证码: ${code}\n\n请将此验证码输入到验证框中完成注册。`);
-    return true; // 返回true以便测试继续进行
+    return false;
   }
 };
 
