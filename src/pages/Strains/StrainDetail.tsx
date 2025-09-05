@@ -1,5 +1,6 @@
 import React from 'react';
 import { useApp } from '../../contexts/AppContext';
+import { useAuth } from '../../contexts/AuthContext';
 import Modal from '../../components/Common/Modal';
 import { Strain } from '../../types';
 import { Edit2, Trash2, Calendar, User, MapPin, FlaskConical } from 'lucide-react';
@@ -13,6 +14,7 @@ interface StrainDetailProps {
 
 const StrainDetail: React.FC<StrainDetailProps> = ({ strain, onClose, onEdit }) => {
   const { deleteStrain } = useApp();
+  const { user } = useAuth();
 
   const handleDelete = () => {
     if (window.confirm('确定要删除这个菌种吗？此操作不可恢复。')) {
@@ -120,15 +122,17 @@ const StrainDetail: React.FC<StrainDetailProps> = ({ strain, onClose, onEdit }) 
             <Edit2 size={16} />
             编辑
           </button>
-          <button
-            onClick={handleDelete}
-            className="flex-1 bg-red-600 hover:bg-red-700 text-paper-50 px-6 py-3 rounded-lg 
-                     font-medium transition-all duration-200 shadow-md hover:shadow-lg 
-                     active:scale-95 flex items-center justify-center gap-2"
-          >
-            <Trash2 size={16} />
-            删除
-          </button>
+          {user?.role === 'admin' && (
+            <button
+              onClick={handleDelete}
+              className="flex-1 bg-red-600 hover:bg-red-700 text-paper-50 px-6 py-3 rounded-lg 
+                       font-medium transition-all duration-200 shadow-md hover:shadow-lg 
+                       active:scale-95 flex items-center justify-center gap-2"
+            >
+              <Trash2 size={16} />
+              删除
+            </button>
+          )}
         </div>
       </div>
     </Modal>

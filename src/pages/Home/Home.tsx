@@ -36,11 +36,14 @@ const Home: React.FC = () => {
   // 检查用户是否在成员名单中
   React.useEffect(() => {
     if (user) {
-      const userInMembers = members.find(member => member.name === user.username);
-      if (!userInMembers) {
-        alert('您不在成员名单中，请联系管理员添加您的信息');
-        navigate('/members');
-        return;
+      // 只对普通成员进行检查，管理员不需要在成员名单中
+      if (user.role === 'member') {
+        const userInMembers = members.find(member => member.name === user.username);
+        if (!userInMembers) {
+          alert('您不在成员名单中，请联系管理员添加您的信息');
+          navigate('/members');
+          return;
+        }
       }
 
       // 检查今日值日安排

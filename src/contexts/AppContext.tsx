@@ -163,10 +163,6 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
   };
 
   const updateStrain = (id: string, strain: Partial<Strain>) => {
-    if (user?.role !== 'admin') {
-      alert('只有管理员可以编辑菌种信息');
-      return;
-    }
     setStrains(prev => prev.map(s => s.id === id ? { ...s, ...strain, updatedAt: new Date() } : s));
     logActivity('编辑', '菌种保藏', `编辑菌种: ${strain.name || id}`);
   };
@@ -194,10 +190,6 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
   };
 
   const updateMember = (id: string, member: Partial<Member>) => {
-    if (user?.role !== 'admin') {
-      alert('只有管理员可以编辑成员信息');
-      return;
-    }
     setMembers(prev => prev.map(m => m.id === id ? { ...m, ...member, updatedAt: new Date() } : m));
     logActivity('编辑', '成员名单', `编辑成员: ${member.name || id}`);
   };
@@ -225,10 +217,6 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
   };
 
   const updateDutySchedule = (id: string, schedule: Partial<DutySchedule>) => {
-    if (user?.role !== 'admin') {
-      alert('只有管理员可以编辑值日安排');
-      return;
-    }
     setDutySchedules(prev => prev.map(d => d.id === id ? { ...d, ...schedule, updatedAt: new Date() } : d));
     logActivity('编辑', '卫生值日', `编辑值日安排: ${schedule.date || id}`);
   };
@@ -263,10 +251,6 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
   };
 
   const updateMedium = (id: string, medium: Partial<Medium>) => {
-    if (user?.role !== 'admin') {
-      alert('只有管理员可以编辑培养基信息');
-      return;
-    }
     setMedia(prev => prev.map(m => m.id === id ? { ...m, ...medium, updatedAt: new Date() } : m));
     logActivity('编辑', '培养基推荐', `编辑培养基: ${medium.name || id}`);
   };
@@ -294,10 +278,6 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
   };
 
   const updateThesis = (id: string, thesis: Partial<Thesis>) => {
-    if (user?.role !== 'admin') {
-      alert('只有管理员可以编辑论文信息');
-      return;
-    }
     setTheses(prev => prev.map(t => t.id === id ? { ...t, ...thesis, updatedAt: new Date() } : t));
     logActivity('编辑', '历届毕业论文', `编辑论文: ${thesis.title || id}`);
   };

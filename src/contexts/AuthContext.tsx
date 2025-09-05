@@ -29,6 +29,25 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     verificationCode: string;
   } | null>(null);
 
+  // 初始化管理员账户
+  useEffect(() => {
+    const users = getGlobalUsers();
+    const adminExists = users.some(u => u.username === 'admin');
+    
+    if (!adminExists) {
+      const adminUser: User = {
+        id: 'admin-001',
+        username: 'admin',
+        email: 'admin@sgxy.edu.cn',
+        password: 'admin',
+        role: 'admin',
+        createdAt: new Date()
+      };
+      users.push(adminUser);
+      setGlobalUsers(users);
+    }
+  }, []);
+
   useEffect(() => {
     const savedUser = localStorage.getItem(CURRENT_USER_KEY);
     if (savedUser) {
