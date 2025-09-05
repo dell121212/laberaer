@@ -92,9 +92,18 @@ npm run dev
 
 ### 常见问题
 
-1. **连接错误**: 检查 URL 和 API Key 是否正确
-2. **权限错误**: 确保 RLS 策略已正确设置
-3. **认证失败**: 检查 Site URL 配置
+1. **"Failed to fetch" 错误**: 
+   - 检查 `.env` 文件中的 `VITE_SUPABASE_URL` 和 `VITE_SUPABASE_ANON_KEY` 是否正确
+   - 确保URL格式为 `https://your-project-ref.supabase.co`
+   - 重启开发服务器 `npm run dev`
+
+2. **"Template ID not found" 错误**:
+   - 登录 [EmailJS Dashboard](https://dashboard.emailjs.com/admin/templates)
+   - 创建模板ID为 `template_verification` 的邮件模板
+   - 确保模板包含 `{{verification_code}}` 变量
+
+3. **权限错误**: 确保 RLS 策略已正确设置
+4. **认证失败**: 检查 Site URL 配置
 
 ### 调试步骤
 

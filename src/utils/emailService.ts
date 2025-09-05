@@ -22,6 +22,19 @@ export const generateVerificationCode = (): string => {
 // 发送验证邮件
 export const sendVerificationEmail = async (email: string, code: string, username: string): Promise<boolean> => {
   try {
+    // 检查EmailJS配置
+    if (!EMAILJS_SERVICE_ID || !EMAILJS_TEMPLATE_ID || !EMAILJS_PUBLIC_KEY || 
+        EMAILJS_SERVICE_ID === 'service_ov4ajko' || 
+        EMAILJS_TEMPLATE_ID === 'template_verification') {
+      console.warn('EmailJS not fully configured. Showing test verification code.');
+      // 在开发环境显示验证码用于测试
+      if (import.meta.env.DEV) {
+        alert(`测试模式 - 验证码: ${code}\n\n请在EmailJS控制台创建模板ID为 'template_verification' 的邮件模板`);
+        return true;
+      }
+      return false;
+    }
+
     const templateParams = {
       to_email: email,
       to_name: username,
@@ -41,6 +54,11 @@ export const sendVerificationEmail = async (email: string, code: string, usernam
     return response.status === 200;
   } catch (error) {
     console.error('邮件发送失败:', error);
+    // 在开发环境显示验证码用于测试
+    if (import.meta.env.DEV) {
+      alert(`邮件发送失败，测试模式 - 验证码: ${code}\n\n请检查EmailJS配置`);
+      return true;
+    }
     return false;
   }
 };

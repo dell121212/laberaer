@@ -180,6 +180,15 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
   const register = async (username: string, email: string, password: string, verificationCode?: string): Promise<{ success: boolean; needsVerification?: boolean; message?: string }> => {
     try {
+      // 检查Supabase配置
+      if (!import.meta.env.VITE_SUPABASE_URL || 
+          import.meta.env.VITE_SUPABASE_URL === 'https://your-project-ref.supabase.co') {
+        return { 
+          success: false, 
+          message: '系统配置未完成，请联系管理员配置Supabase数据库连接' 
+        };
+      }
+
       if (!validateEmail(email)) {
         return { success: false, message: '邮箱格式不正确' };
       }

@@ -4,10 +4,15 @@ const supabaseUrl = import.meta.env.VITE_SUPABASE_URL
 const supabaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY
 
 if (!supabaseUrl || !supabaseKey) {
-  throw new Error('Missing Supabase environment variables')
+  console.warn('Supabase environment variables not configured. Please update .env file with your Supabase project details.')
+  // 使用占位符避免应用崩溃
+  const placeholderUrl = 'https://placeholder.supabase.co'
+  const placeholderKey = 'placeholder-key'
+  export const supabase = createClient(placeholderUrl, placeholderKey)
+} else {
+  export const supabase = createClient(supabaseUrl, supabaseKey)
 }
 
-export const supabase = createClient(supabaseUrl, supabaseKey)
 
 // 数据库表结构
 export interface Database {
