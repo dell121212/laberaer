@@ -175,4 +175,4 @@ const Settings: React.FC = () => {
   );
 };
 
-export default UserProfile;
+export default Settings;
