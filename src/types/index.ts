@@ -179,18 +179,6 @@ const StrainsList: React.FC = () => {
           onEdit={handleEditStrain}
         />
       )}
-
-            <div className="p-6 border-t border-secondary-200 dark:border-secondary-700">
-              <button
-                onClick={() => setShowReminders(false)}
-                className="w-full btn-primary"
-              >
-                我知道了
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 };
