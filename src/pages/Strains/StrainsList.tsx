@@ -1,322 +1,160 @@
-import React, { useState, useEffect } from 'react';
-import { X, Save, Download } from 'lucide-react';
+import React, { useState } from 'react';
 import { useApp } from '../../contexts/AppContext';
-import { useAuth } from '../../contexts/AuthContext';
-import { Strain } from '../../types';
+import SearchBar from '../../components/Common/SearchBar';
+import FloatingActionButton from '../../components/Common/FloatingActionButton';
+import ImportExportButtons from '../../components/Common/ImportExportButtons';
+import StrainForm from './StrainForm';
+import StrainDetail from './StrainDetail';
+import { Beaker, Filter } from 'lucide-react';
+import { format } from 'date-fns';
 
-interface StrainFormProps {
-  strain?: Strain;
-  onClose: () => void;
-  onSuccess?: () => void;
-}
+const StrainsList: React.FC = () => {
+  const { strains } = useApp();
+  const [searchQuery, setSearchQuery] = useState('');
+  const [selectedType, setSelectedType] = useState('');
+  const [showForm, setShowForm] = useState(false);
+  const [editingStrain, setEditingStrain] = useState(null);
+  const [selectedStrain, setSelectedStrain] = useState(null);
+  const [showFilters, setShowFilters] = useState(false);
 
-const StrainForm: React.FC<StrainFormProps> = ({ strain, onClose, onSuccess }) => {
-  const { user } = useAuth();
-  const { downloadTemplate, addStrain, updateStrain } = useApp();
-  
-  const [formData, setFormData] = useState({
-    name: '',
-    scientificName: '',
-    type: 'true_fungi' as 'true_fungi' | 'bacteria' | 'other',
-    source: '',
-    preservationMethod: '',
-    preservationTemperature: '',
-    location: '',
-    description: '',
-    addedBy: user?.username || '',
-    transferReminder: {
-      enabled: false,
-      intervalDays: 30
-    }
+  const strainTypes = [...new Set(strains.map(strain => strain.type))];
+
+  const filteredStrains = strains.filter(strain => {
+    const matchesSearch = strain.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                         strain.description.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesType = !selectedType || strain.type === selectedType;
+    return matchesSearch && matchesType;
   });
 
-  const [errors, setErrors] = useState<Record<string, string>>({});
-
-  useEffect(() => {
-    if (strain) {
-      setFormData({
-        name: strain.name,
-        scientificName: strain.scientificName,
-        type: strain.type,
-        source: strain.source,
-        preservationMethod: strain.preservationMethod,
-        preservationTemperature: strain.preservationTemperature || '',
-        location: strain.location,
-        description: strain.description,
-        addedBy: strain.addedBy,
-        transferReminder: {
-          enabled: false,
-          intervalDays: 30
-        }
-      });
-    }
-  }, [strain]);
-
-  const validateForm = () => {
-    const newErrors: Record<string, string> = {};
-
-    if (!formData.name.trim()) {
-      newErrors.name = '菌种名称不能为空';
-    }
-    if (!formData.scientificName.trim()) {
-      newErrors.scientificName = '学名不能为空';
-    }
-    if (!formData.source.trim()) {
-      newErrors.source = '来源不能为空';
-    }
-    if (!formData.preservationMethod.trim()) {
-      newErrors.preservationMethod = '保藏方法不能为空';
-    }
-    if (!formData.preservationTemperature.trim()) {
-      newErrors.preservationTemperature = '保藏温度不能为空';
-    }
-    if (!formData.location.trim()) {
-      newErrors.location = '保藏位置不能为空';
-    }
-
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
+  const handleAddStrain = () => {
+    setEditingStrain(null);
+    setShowForm(true);
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (validateForm()) {
-      if (strain) {
-        updateStrain(strain.id, formData);
-      } else {
-        addStrain(formData);
-      }
-      onSuccess?.();
-      onClose();
-    }
+  const handleEditStrain = (strain: any) => {
+    setEditingStrain(strain);
+    setSelectedStrain(null);
+    setShowForm(true);
   };
-
-  const handleInputChange = (field: string, value: string) => {
-    setFormData(prev => ({ ...prev, [field]: value }));
-    if (errors[field]) {
-      setErrors(prev => ({ ...prev, [field]: '' }));
-    }
-  };
-
-  const handleDownloadTemplate = () => {
-    downloadTemplate('strains');
-  };
-
-  const typeOptions = [
-    { value: 'true_fungi', label: '真菌' },
-    { value: 'bacteria', label: '细菌' },
-    { value: 'other', label: '其它' }
-  ];
 
   return (
-    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-50">
-      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-hidden">
-        <div className="bg-gradient-to-r from-blue-600 to-purple-600 p-6 text-white">
-          <div className="flex items-center justify-between">
-            <h2 className="text-2xl font-bold">
-              {strain ? '编辑菌种' : '添加菌种'}
-            </h2>
-            <div className="flex items-center gap-2">
+    <div className="min-h-screen bg-gray-50 pb-20">
+      {/* Header */}
+      <div className="bg-white shadow-sm p-4">
+        <div className="max-w-md mx-auto">
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center gap-3">
+              <Beaker size={24} className="text-blue-600" />
+              <h1 className="text-xl font-bold text-gray-900">菌种保藏</h1>
+            </div>
+            <div className="flex gap-2">
               <button
-                onClick={handleDownloadTemplate}
-                className="p-2 hover:bg-white/20 rounded-lg transition-colors"
-                title="下载模板"
+                onClick={() => setShowFilters(!showFilters)}
+                className="p-2 rounded-lg hover:bg-gray-100 transition-colors"
               >
-                <Download className="w-5 h-5" />
+                <Filter size={18} className="text-gray-600" />
               </button>
-              <button
-                onClick={onClose}
-                className="p-2 hover:bg-white/20 rounded-lg transition-colors"
+              <ImportExportButtons module="strains" />
+            </div>
+          </div>
+          
+          <SearchBar
+            value={searchQuery}
+            onChange={setSearchQuery}
+            placeholder="搜索菌种名称或描述..."
+          />
+          
+          {showFilters && (
+            <div className="mt-4">
+              <select
+                value={selectedType}
+                onChange={(e) => setSelectedType(e.target.value)}
+                className="modern-input"
               >
-                <X className="w-5 h-5" />
-              </button>
+                <option value="">所有类型</option>
+                {strainTypes.map(type => (
+                  <option key={type} value={type}>{type}</option>
+                ))}
+              </select>
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Stats */}
+      <div className="max-w-md mx-auto px-4 py-4">
+        <div className="modern-card mb-4">
+          <div className="flex justify-between items-center">
+            <div>
+              <p className="text-2xl font-bold text-gray-900">{filteredStrains.length}</p>
+              <p className="text-gray-600">菌种总数</p>
+            </div>
+            <div className="text-right">
+              <p className="text-sm text-gray-600">最近添加</p>
+              <p className="font-medium text-gray-800">
+                {strains.length > 0 ? 
+                  strains.sort((a, b) => new Date(b.addedAt).getTime() - new Date(a.addedAt).getTime())[0].name :
+                  '暂无数据'
+                }
+              </p>
             </div>
           </div>
         </div>
 
-        <form onSubmit={handleSubmit} className="p-6 overflow-y-auto max-h-[calc(90vh-120px)]">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                菌种名称 *
-              </label>
-              <input
-                type="text"
-                value={formData.name}
-                onChange={(e) => handleInputChange('name', e.target.value)}
-                className={`modern-input ${errors.name ? 'border-red-500' : ''}`}
-                placeholder="请输入菌种名称"
-              />
-              {errors.name && <p className="text-red-500 text-sm mt-1">{errors.name}</p>}
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                学名 *
-              </label>
-              <input
-                type="text"
-                value={formData.scientificName}
-                onChange={(e) => handleInputChange('scientificName', e.target.value)}
-                className={`modern-input ${errors.scientificName ? 'border-red-500' : ''}`}
-                placeholder="请输入学名"
-              />
-              {errors.scientificName && <p className="text-red-500 text-sm mt-1">{errors.scientificName}</p>}
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                菌种类型 *
-              </label>
-              <select
-                value={formData.type}
-                onChange={(e) => handleInputChange('type', e.target.value)}
-                className="modern-input"
-              >
-                {typeOptions.map(option => (
-                  <option key={option.value} value={option.value}>
-                    {option.label}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                来源 *
-              </label>
-              <input
-                type="text"
-                value={formData.source}
-                onChange={(e) => handleInputChange('source', e.target.value)}
-                className={`modern-input ${errors.source ? 'border-red-500' : ''}`}
-                placeholder="请输入菌种来源"
-              />
-              {errors.source && <p className="text-red-500 text-sm mt-1">{errors.source}</p>}
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                保藏方法 *
-              </label>
-              <input
-                type="text"
-                value={formData.preservationMethod}
-                onChange={(e) => handleInputChange('preservationMethod', e.target.value)}
-                className={`modern-input ${errors.preservationMethod ? 'border-red-500' : ''}`}
-                placeholder="请输入保藏方法"
-              />
-              {errors.preservationMethod && <p className="text-red-500 text-sm mt-1">{errors.preservationMethod}</p>}
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                保藏温度 *
-              </label>
-              <input
-                type="text"
-                value={formData.preservationTemperature}
-                onChange={(e) => handleInputChange('preservationTemperature', e.target.value)}
-                className={`modern-input ${errors.preservationTemperature ? 'border-red-500' : ''}`}
-                placeholder="请输入保藏温度"
-              />
-              {errors.preservationTemperature && <p className="text-red-500 text-sm mt-1">{errors.preservationTemperature}</p>}
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                保藏位置 *
-              </label>
-              <input
-                type="text"
-                value={formData.location}
-                onChange={(e) => handleInputChange('location', e.target.value)}
-                className={`modern-input ${errors.location ? 'border-red-500' : ''}`}
-                placeholder="请输入保藏位置"
-              />
-              {errors.location && <p className="text-red-500 text-sm mt-1">{errors.location}</p>}
-            </div>
-
-            <div className="md:col-span-2">
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                描述
-              </label>
-              <textarea
-                value={formData.description}
-                onChange={(e) => handleInputChange('description', e.target.value)}
-                className="modern-input"
-                rows={3}
-                placeholder="请输入菌种描述"
-              />
-            </div>
-
-            <div className="md:col-span-2">
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                转接提醒设置
-              </label>
-              <div className="space-y-3 p-4 bg-gray-50 rounded-lg">
-                <label className="flex items-center gap-2">
-                  <input
-                    type="checkbox"
-                    checked={formData.transferReminder.enabled}
-                    onChange={(e) => setFormData(prev => ({
-                      ...prev,
-                      transferReminder: {
-                        ...prev.transferReminder,
-                        enabled: e.target.checked
-                      }
-                    }))}
-                    className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-                  />
-                  <span className="text-sm text-gray-700">启用转接提醒</span>
-                </label>
-                
-                {formData.transferReminder.enabled && (
-                  <div>
-                    <label className="block text-sm text-gray-600 mb-1">
-                      提醒间隔（天）
-                    </label>
-                    <input
-                      type="number"
-                      min="1"
-                      max="365"
-                      value={formData.transferReminder.intervalDays}
-                      onChange={(e) => setFormData(prev => ({
-                        ...prev,
-                        transferReminder: {
-                          ...prev.transferReminder,
-                          intervalDays: parseInt(e.target.value) || 30
-                        }
-                      }))}
-                      className="modern-input"
-                      placeholder="30"
-                    />
-                  </div>
-                )}
+        {/* Strains List */}
+        <div className="space-y-3">
+          {filteredStrains.map((strain, index) => (
+            <div 
+              key={strain.id} 
+              className="modern-card cursor-pointer hover:shadow-md transition-all duration-200"
+              onClick={() => setSelectedStrain(strain)}
+            >
+              <div className="flex justify-between items-start mb-2">
+                <h3 className="font-semibold text-gray-900 flex-1 pr-2">
+                  {strain.name}
+                </h3>
+                <span className="px-2 py-1 bg-blue-100 text-blue-700 text-xs rounded-full whitespace-nowrap">
+                  {strain.type}
+                </span>
+              </div>
+              <p className="text-gray-600 text-sm mb-2 line-clamp-2">
+                {strain.description}
+              </p>
+              <div className="flex justify-between items-center text-xs text-gray-500">
+                <span>来源：{strain.source}</span>
+                <span>{format(new Date(strain.addedAt), 'MM-dd')}</span>
               </div>
             </div>
-          </div>
+          ))}
+        </div>
 
-          <div className="flex justify-end gap-3 mt-6 pt-6 border-t">
-            <button
-              type="button"
-              onClick={onClose}
-              className="px-6 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors"
-            >
-              取消
-            </button>
-            <button
-              type="submit"
-              className="px-6 py-2 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg hover:from-blue-700 hover:to-purple-700 transition-all duration-200 flex items-center gap-2"
-            >
-              <Save className="w-4 h-4" />
-              {strain ? '更新' : '添加'}
-            </button>
+        {filteredStrains.length === 0 && (
+          <div className="text-center py-12">
+            <Beaker size={48} className="mx-auto text-gray-300 mb-4" />
+            <p className="text-gray-500">暂无菌种数据</p>
+            <p className="text-gray-400 text-sm">点击右下角按钮添加菌种</p>
           </div>
-        </form>
+        )}
       </div>
+
+      <FloatingActionButton onClick={handleAddStrain} />
+
+      {showForm && (
+        <StrainForm
+          strain={editingStrain}
+          onClose={() => setShowForm(false)}
+        />
+      )}
+
+      {selectedStrain && (
+        <StrainDetail
+          strain={selectedStrain}
+          onClose={() => setSelectedStrain(null)}
+          onEdit={handleEditStrain}
+        />
+      )}
     </div>
   );
 };
 
-export default StrainForm;
+export default StrainsList;

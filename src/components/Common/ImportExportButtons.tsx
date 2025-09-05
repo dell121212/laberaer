@@ -30,7 +30,6 @@ const ImportExportButtons: React.FC<ImportExportButtonsProps> = ({ module, onImp
     try {
       await importData(module, file);
       onImportSuccess?.();
-      // 清空文件输入
       if (fileInputRef.current) {
         fileInputRef.current.value = '';
       }
@@ -43,24 +42,24 @@ const ImportExportButtons: React.FC<ImportExportButtonsProps> = ({ module, onImp
     <div className="flex gap-2">
       <button
         onClick={handleDownloadTemplate}
-        className="p-2 rounded-lg hover:bg-white/20 transition-colors"
+        className="p-2 rounded-lg hover:bg-gray-100 transition-colors"
         title="下载模板"
       >
-        <Download size={20} />
+        <Download size={18} className="text-gray-600" />
       </button>
       <button
         onClick={handleImportClick}
-        className="p-2 rounded-lg hover:bg-white/20 transition-colors"
+        className="p-2 rounded-lg hover:bg-gray-100 transition-colors"
         title="导入数据"
       >
-        <Upload size={20} />
+        <Upload size={18} className="text-gray-600" />
       </button>
       <button
         onClick={handleExport}
-        className="p-2 rounded-lg hover:bg-white/20 transition-colors"
+        className="p-2 rounded-lg hover:bg-gray-100 transition-colors"
         title="导出数据"
       >
-        <Download size={20} />
+        <Download size={18} className="text-gray-600" />
       </button>
       
       <input
