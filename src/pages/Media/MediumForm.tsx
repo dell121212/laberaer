@@ -181,6 +181,32 @@ const MediumForm: React.FC<MediumFormProps> = ({ medium, onClose }) => {
               />
             </div>
             <div>
+              <label className="block text-xs text-secondary-600 mb-1">保藏温度</label>
+              <input
+                type="text"
+                value={formData.cultivationParams.storage_temperature || ''}
+                onChange={(e) => setFormData(prev => ({
+                  ...prev,
+                  cultivationParams: { ...prev.cultivationParams, storage_temperature: e.target.value }
+                }))}
+                className="modern-input"
+                placeholder="如：4°C、-20°C"
+              />
+            </div>
+            <div>
+              <label className="block text-xs text-secondary-600 mb-1">保藏时间</label>
+              <input
+                type="text"
+                value={formData.cultivationParams.storage_time || ''}
+                onChange={(e) => setFormData(prev => ({
+                  ...prev,
+                  cultivationParams: { ...prev.cultivationParams, storage_time: e.target.value }
+                }))}
+                className="modern-input"
+                placeholder="如：6个月、1年"
+              />
+            </div>
+            <div>
               <label className="block text-xs text-secondary-600 mb-1">其他参数</label>
               <input
                 type="text"

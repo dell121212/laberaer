@@ -205,6 +205,8 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
   // Strain operations
   const addStrain = async (strain: Omit<Strain, 'id' | 'addedAt' | 'updatedAt'>) => {
     try {
+      console.log('🧪 开始添加菌种:', strain);
+      
       const { data, error } = await supabase
         .from('strains')
         .insert({
@@ -221,7 +223,12 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
         .select()
         .single();
 
-      if (error) throw error;
+      if (error) {
+        console.error('❌ 添加菌种失败:', error);
+        throw error;
+      }
+
+      console.log('✅ 菌种添加成功:', data);
 
       const newStrain: Strain = {
         id: data.id,
@@ -242,7 +249,7 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
       logActivity('添加', '菌种保藏', `添加菌种: ${strain.name}`);
     } catch (error) {
       console.error('Error adding strain:', error);
-      alert('添加菌种失败，请重试');
+      alert(`添加菌种失败: ${error.message || '请重试'}`);
     }
   };
 
@@ -301,6 +308,8 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
   // Member operations
   const addMember = async (member: Omit<Member, 'id' | 'joinedAt' | 'updatedAt'>) => {
     try {
+      console.log('👥 开始添加成员:', member);
+      
       const { data, error } = await supabase
         .from('members')
         .insert({
@@ -315,7 +324,12 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
         .select()
         .single();
 
-      if (error) throw error;
+      if (error) {
+        console.error('❌ 添加成员失败:', error);
+        throw error;
+      }
+
+      console.log('✅ 成员添加成功:', data);
 
       const newMember: Member = {
         id: data.id,
@@ -334,7 +348,7 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
       logActivity('添加', '成员名单', `添加成员: ${member.name}`);
     } catch (error) {
       console.error('Error adding member:', error);
-      alert('添加成员失败，请重试');
+      alert(`添加成员失败: ${error.message || '请重试'}`);
     }
   };
 
@@ -392,6 +406,8 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
   // Duty schedule operations
   const addDutySchedule = async (schedule: Omit<DutySchedule, 'id' | 'createdAt' | 'updatedAt'>) => {
     try {
+      console.log('📅 开始添加值日安排:', schedule);
+      
       const { data, error } = await supabase
         .from('duty_schedules')
         .insert({
@@ -404,7 +420,12 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
         .select()
         .single();
 
-      if (error) throw error;
+      if (error) {
+        console.error('❌ 添加值日安排失败:', error);
+        throw error;
+      }
+
+      console.log('✅ 值日安排添加成功:', data);
 
       const newSchedule: DutySchedule = {
         id: data.id,
@@ -421,7 +442,7 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
       logActivity('添加', '卫生值日', `添加值日安排: ${schedule.date}`);
     } catch (error) {
       console.error('Error adding duty schedule:', error);
-      alert('添加值日安排失败，请重试');
+      alert(`添加值日安排失败: ${error.message || '请重试'}`);
     }
   };
 
@@ -477,6 +498,8 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
   // Medium operations
   const addMedium = async (medium: Omit<Medium, 'id' | 'createdAt' | 'updatedAt'>) => {
     try {
+      console.log('🧫 开始添加培养基:', medium);
+      
       const { data, error } = await supabase
         .from('media')
         .insert({
@@ -488,14 +511,21 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
             temperature: '',
             time: '',
             ph: '',
-            other: ''
+            other: '',
+            storage_temperature: '',
+            storage_time: ''
           },
           recommended_by: medium.recommendedBy
         })
         .select()
         .single();
 
-      if (error) throw error;
+      if (error) {
+        console.error('❌ 添加培养基失败:', error);
+        throw error;
+      }
+
+      console.log('✅ 培养基添加成功:', data);
 
       const newMedium: Medium = {
         id: data.id,
@@ -513,7 +543,7 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
       logActivity('添加', '培养基推荐', `添加培养基: ${medium.name}`);
     } catch (error) {
       console.error('Error adding medium:', error);
-      alert('添加培养基失败，请重试');
+      alert(`添加培养基失败: ${error.message || '请重试'}`);
     }
   };
 
@@ -570,6 +600,8 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
   // Thesis operations
   const addThesis = async (thesis: Omit<Thesis, 'id' | 'createdAt' | 'updatedAt'>) => {
     try {
+      console.log('🎓 开始添加论文:', thesis);
+      
       const { data, error } = await supabase
         .from('theses')
         .insert({
@@ -582,7 +614,12 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
         .select()
         .single();
 
-      if (error) throw error;
+      if (error) {
+        console.error('❌ 添加论文失败:', error);
+        throw error;
+      }
+
+      console.log('✅ 论文添加成功:', data);
 
       const newThesis: Thesis = {
         id: data.id,
@@ -599,7 +636,7 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
       logActivity('添加', '历届毕业论文', `添加论文: ${thesis.title}`);
     } catch (error) {
       console.error('Error adding thesis:', error);
-      alert('添加论文失败，请重试');
+      alert(`添加论文失败: ${error.message || '请重试'}`);
     }
   };
 

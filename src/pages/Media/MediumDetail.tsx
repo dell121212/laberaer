@@ -109,6 +109,18 @@ const MediumDetail: React.FC<MediumDetailProps> = ({ medium, onClose, onEdit }) 
                     <p className="font-medium text-secondary-800">{medium.cultivationParams.ph}</p>
                   </div>
                 )}
+                {medium.cultivationParams.storage_temperature && (
+                  <div className="bg-secondary-50 p-3 rounded-lg">
+                    <p className="text-xs text-secondary-500 mb-1">保藏温度</p>
+                    <p className="font-medium text-secondary-800">{medium.cultivationParams.storage_temperature}</p>
+                  </div>
+                )}
+                {medium.cultivationParams.storage_time && (
+                  <div className="bg-secondary-50 p-3 rounded-lg">
+                    <p className="text-xs text-secondary-500 mb-1">保藏时间</p>
+                    <p className="font-medium text-secondary-800">{medium.cultivationParams.storage_time}</p>
+                  </div>
+                )}
                 {medium.cultivationParams.other && (
                   <div className="bg-secondary-50 p-3 rounded-lg">
                     <p className="text-xs text-secondary-500 mb-1">其他参数</p>
