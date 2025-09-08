@@ -59,46 +59,34 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     try {
       console.log('开始登录流程:', { username, password: '***' });
       
-      // 测试数据库连接
-      const { data: testData, error: testError } = await supabase
-        .from('users')
-        .select('count')
-        .limit(1);
-      
-      console.log('数据库连接测试:', { testData, testError });
-      
-      if (testError) {
-        console.error('数据库连接失败:', testError);
-        alert('数据库连接失败，请检查网络连接');
-        return false;
-      }
-
       // 查询用户
       const { data: userData, error: queryError } = await supabase
         .from('users')
         .select('*')
-        .eq('username', username)
-        .eq('password', password);
+        .eq('username', username);
 
       console.log('用户查询结果:', { userData, queryError });
 
       if (queryError) {
         console.error('查询用户失败:', queryError);
-        alert('查询用户失败: ' + queryError.message);
         return false;
       }
 
       if (!userData || userData.length === 0) {
         console.log('用户名或密码错误');
-        alert('用户名或密码错误');
         return false;
       }
 
       const userRecord = userData[0];
       console.log('找到用户记录:', userRecord);
 
+      // 验证密码
+      if (userRecord.password !== password) {
+        console.log('密码错误');
+        return false;
+      }
+
       if (userRecord.is_blocked) {
-        alert('账户已被限制，请联系管理员');
         return false;
       }
 
@@ -117,7 +105,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       return true;
     } catch (error) {
       console.error('登录过程中发生错误:', error);
-      alert('登录失败: ' + (error as Error).message);
       return false;
     }
   };
