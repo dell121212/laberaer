@@ -99,11 +99,9 @@ const Login: React.FC = () => {
               </>
             )}
           </h3>
-          {isLogin && (
-            <p className="text-sm text-blue-600 mt-2">
-              💡 管理员账户：admin / admin123
-            </p>
-          )}
+          <p className="text-sm text-blue-600 mt-2">
+            💡 {isLogin ? '管理员账户：admin / admin' : '请填写真实信息注册'}
+          </p>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-4">
