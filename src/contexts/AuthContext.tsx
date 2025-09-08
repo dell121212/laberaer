@@ -14,11 +14,8 @@ interface AuthContextType {
   user: User | null;
   loading: boolean;
   login: (username: string, password: string) => Promise<boolean>;
-  register: (username: string, email: string, password: string) => Promise<{ success: boolean; needsVerification?: boolean; message?: string }>;
+  register: (username: string, email: string, password: string) => Promise<{ success: boolean; message?: string }>;
   logout: () => void;
-  sendVerificationCode: (email: string) => Promise<boolean>;
-  completePendingRegistration: (code: string) => Promise<{ success: boolean; message: string }>;
-  pendingRegistration: any;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -38,7 +35,6 @@ interface AuthProviderProps {
 export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
-  const [pendingRegistration, setPendingRegistration] = useState<any>(null);
 
   useEffect(() => {
     // 检查本地存储的用户信息
@@ -77,13 +73,15 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
           .insert({
             username: 'admin',
             email: 'admin@sgxy.edu.cn',
-            password: 'admin', // 简单存储，实际项目中应该加密
+            password: 'admin123', // 简单密码
             role: 'admin',
             is_blocked: false
           });
 
         if (error) {
           console.error('创建管理员失败:', error);
+        } else {
+          console.log('管理员账户创建成功');
         }
       }
     } catch (error) {
@@ -101,11 +99,13 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         .single();
 
       if (error || !userData) {
+        console.error('登录失败:', error);
         return false;
       }
 
       if (userData.is_blocked) {
-        throw new Error('账户已被限制，请联系管理员');
+        alert('账户已被限制，请联系管理员');
+        return false;
       }
 
       const user: User = {
@@ -156,7 +156,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         .insert({
           username,
           email,
-          password, // 简单存储，实际项目中应该加密
+          password, // 简单存储密码
           role: 'member',
           is_blocked: false
         })
@@ -164,10 +164,11 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         .single();
 
       if (error) {
+        console.error('注册失败:', error);
         return { success: false, message: '注册失败：' + error.message };
       }
 
-      return { success: true, message: '注册成功' };
+      return { success: true, message: '注册成功！请登录' };
     } catch (error) {
       console.error('注册失败:', error);
       return { success: false, message: '注册失败，请重试' };
@@ -179,25 +180,12 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     localStorage.removeItem('current_user');
   };
 
-  const sendVerificationCode = async (email: string): Promise<boolean> => {
-    // 简化版本，直接返回成功
-    return true;
-  };
-
-  const completePendingRegistration = async (code: string) => {
-    // 简化版本，直接返回成功
-    return { success: true, message: '验证成功' };
-  };
-
   const value: AuthContextType = {
     user,
     loading,
     login,
     register,
-    logout,
-    sendVerificationCode,
-    completePendingRegistration,
-    pendingRegistration
+    logout
   };
 
   return (

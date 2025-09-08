@@ -18,6 +18,7 @@ const Login: React.FC = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
+    setSuccess('');
     setLoading(true);
 
     try {
@@ -98,6 +99,11 @@ const Login: React.FC = () => {
               </>
             )}
           </h3>
+          {isLogin && (
+            <p className="text-sm text-blue-600 mt-2">
+              💡 管理员账户：admin / admin123
+            </p>
+          )}
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-4">
@@ -203,6 +209,9 @@ const Login: React.FC = () => {
           <p className="flex items-center justify-center gap-2">
             <span className="emoji-bounce">💻</span> 制作人：陈凯 
             <span className="emoji-bounce" style={{animationDelay: '0.5s'}}>👨‍🏫</span> 指导老师：刘主
+          </p>
+          <p className="mt-2 text-blue-600">
+            ☁️ 云端数据存储 | 🔒 简化认证系统
           </p>
         </div>
       </div>
