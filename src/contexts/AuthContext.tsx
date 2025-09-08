@@ -46,19 +46,53 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
           ...userData,
           createdAt: new Date(userData.createdAt)
         });
-        console.log('从本地存储恢复用户:', userData);
       } catch (error) {
-        console.error('解析用户数据失败:', error);
         localStorage.removeItem('current_user');
       }
     }
     setLoading(false);
   }, []);
 
+  const createAdminIfNotExists = async () => {
+    try {
+      // 检查admin用户是否存在
+      const { data: existingAdmin } = await supabase
+        .from('users')
+        .select('*')
+        .eq('username', 'admin');
+
+      if (!existingAdmin || existingAdmin.length === 0) {
+        // 创建admin用户
+        const { error } = await supabase
+          .from('users')
+          .insert({
+            username: 'admin',
+            email: 'admin@sgxy.edu.cn',
+            password: 'admin123',
+            role: 'admin',
+            is_blocked: false
+          });
+
+        if (error) {
+          console.log('创建admin用户失败，可能已存在:', error.message);
+        } else {
+          console.log('成功创建admin用户');
+        }
+      }
+    } catch (error) {
+      console.log('检查/创建admin用户时出错:', error);
+    }
+  };
+
   const login = async (username: string, password: string): Promise<boolean> => {
     try {
-      console.log('开始登录流程:', { username, password: '***' });
-      
+      console.log('开始登录流程:', { username });
+
+      // 先尝试创建admin用户（如果不存在）
+      if (username === 'admin') {
+        await createAdminIfNotExists();
+      }
+
       // 查询用户
       const { data: userData, error: queryError } = await supabase
         .from('users')
@@ -73,12 +107,11 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       }
 
       if (!userData || userData.length === 0) {
-        console.log('用户名或密码错误');
+        console.log('用户不存在');
         return false;
       }
 
       const userRecord = userData[0];
-      console.log('找到用户记录:', userRecord);
 
       // 验证密码
       if (userRecord.password !== password) {
@@ -87,6 +120,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       }
 
       if (userRecord.is_blocked) {
+        console.log('用户被禁用');
         return false;
       }
 
@@ -111,37 +145,23 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   const register = async (username: string, email: string, password: string) => {
     try {
-      console.log('开始注册流程:', { username, email, password: '***' });
+      console.log('开始注册流程:', { username, email });
 
       // 检查用户名是否已存在
-      const { data: existingUser, error: userCheckError } = await supabase
+      const { data: existingUser } = await supabase
         .from('users')
         .select('username')
         .eq('username', username);
-
-      console.log('用户名检查结果:', { existingUser, userCheckError });
-
-      if (userCheckError) {
-        console.error('检查用户名失败:', userCheckError);
-        return { success: false, message: '检查用户名失败: ' + userCheckError.message };
-      }
 
       if (existingUser && existingUser.length > 0) {
         return { success: false, message: '用户名已存在' };
       }
 
       // 检查邮箱是否已存在
-      const { data: existingEmail, error: emailCheckError } = await supabase
+      const { data: existingEmail } = await supabase
         .from('users')
         .select('email')
         .eq('email', email);
-
-      console.log('邮箱检查结果:', { existingEmail, emailCheckError });
-
-      if (emailCheckError) {
-        console.error('检查邮箱失败:', emailCheckError);
-        return { success: false, message: '检查邮箱失败: ' + emailCheckError.message };
-      }
 
       if (existingEmail && existingEmail.length > 0) {
         return { success: false, message: '邮箱已被注册' };
@@ -159,18 +179,12 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         })
         .select();
 
-      console.log('用户创建结果:', { newUser, insertError });
-
       if (insertError) {
         console.error('创建用户失败:', insertError);
         return { success: false, message: '注册失败: ' + insertError.message };
       }
 
-      if (!newUser || newUser.length === 0) {
-        return { success: false, message: '注册失败，请重试' };
-      }
-
-      console.log('注册成功:', newUser[0]);
+      console.log('注册成功:', newUser);
       return { success: true, message: '注册成功！请登录' };
     } catch (error) {
       console.error('注册过程中发生错误:', error);
@@ -181,7 +195,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const logout = () => {
     setUser(null);
     localStorage.removeItem('current_user');
-    console.log('用户已登出');
   };
 
   const value: AuthContextType = {
