@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
-import { LogIn, UserPlus } from 'lucide-react';
+import { LogIn, UserPlus, Heart, Sparkles } from 'lucide-react';
 
 const Login: React.FC = () => {
   const [isLogin, setIsLogin] = useState(true);
@@ -48,46 +48,76 @@ const Login: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
-      <div className="bg-white rounded-lg shadow-lg w-full max-w-md p-8">
+    <div className="min-h-screen animated-gradient flex items-center justify-center p-4 relative overflow-hidden">
+      {/* 可爱的背景装饰 */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute top-10 left-10 text-6xl emoji-bounce">🌸</div>
+        <div className="absolute top-20 right-20 text-4xl emoji-bounce" style={{animationDelay: '0.5s'}}>✨</div>
+        <div className="absolute bottom-20 left-20 text-5xl emoji-bounce" style={{animationDelay: '1s'}}>🦄</div>
+        <div className="absolute bottom-10 right-10 text-3xl emoji-bounce" style={{animationDelay: '1.5s'}}>💖</div>
+        <div className="absolute top-1/2 left-1/4 text-2xl emoji-bounce" style={{animationDelay: '2s'}}>🌈</div>
+        <div className="absolute top-1/3 right-1/3 text-4xl emoji-bounce" style={{animationDelay: '2.5s'}}>🎀</div>
+      </div>
+
+      <div className="cute-card w-full max-w-md bounce-in cute-shadow">
         {/* 头部 */}
         <div className="text-center mb-8">
-          <h1 className="text-2xl font-bold text-gray-900 mb-2">🏫 韶关学院</h1>
-          <h2 className="text-lg font-semibold text-gray-700 mb-2">🍄 食用菌创新团队</h2>
-          <p className="text-sm text-gray-600">🔬 科研创新 · 🤝 团队协作 · 📚 知识传承</p>
+          <div className="relative inline-block mb-4">
+            <h1 className="text-3xl font-bold gradient-text flex items-center justify-center gap-2">
+              🏫 韶关学院
+              <Heart className="text-pink-500 animate-pulse-cute" size={24} />
+            </h1>
+          </div>
+          <h2 className="text-xl font-semibold text-purple-600 mb-2 flex items-center justify-center gap-2">
+            🍄 食用菌创新团队
+            <Sparkles className="text-yellow-500 animate-wiggle" size={20} />
+          </h2>
+          <p className="text-sm text-gray-600 flex items-center justify-center gap-1">
+            <span className="emoji-bounce">🔬</span> 科研创新 
+            <span className="emoji-bounce" style={{animationDelay: '0.3s'}}>🤝</span> 团队协作 
+            <span className="emoji-bounce" style={{animationDelay: '0.6s'}}>📚</span> 知识传承
+          </p>
         </div>
 
         <div className="text-center mb-6">
-          <h3 className="text-lg font-semibold text-gray-800">
-            {isLogin ? '登录系统' : '注册账号'}
+          <h3 className="text-lg font-semibold text-gray-800 flex items-center justify-center gap-2">
+            {isLogin ? (
+              <>
+                <span className="emoji-bounce">🔑</span> 登录系统
+              </>
+            ) : (
+              <>
+                <span className="emoji-bounce">🌟</span> 注册账号
+              </>
+            )}
           </h3>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              👤 用户名
+            <label className="block text-sm font-medium text-gray-700 mb-2 flex items-center gap-2">
+              <span className="emoji-bounce">👤</span> 用户名
             </label>
             <input
               type="text"
               value={username}
               onChange={(e) => setUsername(e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="cute-input"
               placeholder="请输入您的真实姓名"
               required
             />
           </div>
 
           {!isLogin && (
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                📧 邮箱
+            <div className="slide-up">
+              <label className="block text-sm font-medium text-gray-700 mb-2 flex items-center gap-2">
+                <span className="emoji-bounce">📧</span> 邮箱
               </label>
               <input
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="cute-input"
                 placeholder="请输入邮箱地址"
                 required
               />
@@ -95,42 +125,46 @@ const Login: React.FC = () => {
           )}
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              🔒 密码
+            <label className="block text-sm font-medium text-gray-700 mb-2 flex items-center gap-2">
+              <span className="emoji-bounce">🔒</span> 密码
             </label>
             <input
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="cute-input"
               placeholder="请输入密码"
               required
             />
           </div>
 
           {error && (
-            <div className="text-red-600 text-sm bg-red-50 p-3 rounded-lg border border-red-200">
-              ❌ {error}
+            <div className="text-red-600 text-sm bg-red-50 p-3 rounded-xl border border-red-200 bounce-in">
+              <span className="emoji-bounce">❌</span> {error}
             </div>
           )}
 
           {success && (
-            <div className="text-green-600 text-sm bg-green-50 p-3 rounded-lg border border-green-200">
-              ✅ {success}
+            <div className="text-green-600 text-sm bg-green-50 p-3 rounded-xl border border-green-200 bounce-in">
+              <span className="emoji-bounce">✅</span> {success}
             </div>
           )}
 
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded-lg font-medium transition-colors duration-200 flex items-center justify-center gap-2"
+            className="w-full cute-button flex items-center justify-center gap-2 cute-hover"
           >
             {loading ? (
-              <div className="animate-spin w-5 h-5 border-2 border-white border-t-transparent rounded-full" />
+              <div className="flex items-center gap-2">
+                <div className="animate-spin w-5 h-5 border-2 border-white border-t-transparent rounded-full" />
+                <span className="loading-dots">处理中</span>
+              </div>
             ) : (
               <>
                 {isLogin ? <LogIn size={20} /> : <UserPlus size={20} />}
                 {isLogin ? '登录' : '注册'}
+                <span className="emoji-bounce">{isLogin ? '🚀' : '🌟'}</span>
               </>
             )}
           </button>
@@ -143,15 +177,26 @@ const Login: React.FC = () => {
               setError('');
               setSuccess('');
             }}
-            className="text-blue-600 hover:text-blue-700 text-sm font-medium"
+            className="text-purple-600 hover:text-purple-700 text-sm font-medium cute-hover inline-flex items-center gap-2"
           >
-            {isLogin ? '没有账号？立即注册' : '已有账号？返回登录'}
+            {isLogin ? (
+              <>
+                <span className="emoji-bounce">🌈</span> 没有账号？立即注册
+              </>
+            ) : (
+              <>
+                <span className="emoji-bounce">💫</span> 已有账号？返回登录
+              </>
+            )}
           </button>
         </div>
         
         {/* 底部信息 */}
-        <div className="mt-8 pt-6 border-t border-gray-200 text-center text-xs text-gray-500">
-          <p>💻 制作人：陈凯 | 👨‍🏫 指导老师：刘主</p>
+        <div className="mt-8 pt-6 border-t border-pink-200 text-center text-xs text-gray-500">
+          <p className="flex items-center justify-center gap-2">
+            <span className="emoji-bounce">💻</span> 制作人：陈凯 
+            <span className="emoji-bounce" style={{animationDelay: '0.5s'}}>👨‍🏫</span> 指导老师：刘主
+          </p>
         </div>
       </div>
     </div>

@@ -99,8 +99,9 @@ export default {
         },
       },
       fontFamily: {
-        'sans': ['Inter', 'Noto Sans SC', 'sans-serif'],
-        'display': ['Inter', 'Noto Sans SC', 'sans-serif'],
+        'sans': ['Nunito', 'Inter', 'Noto Sans SC', 'sans-serif'],
+        'nunito': ['Nunito', 'sans-serif'],
+        'display': ['Nunito', 'Inter', 'Noto Sans SC', 'sans-serif'],
       },
       boxShadow: {
         'soft': '0 2px 15px -3px rgba(0, 0, 0, 0.07), 0 10px 20px -2px rgba(0, 0, 0, 0.04)',
