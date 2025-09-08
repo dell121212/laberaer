@@ -64,7 +64,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         .from('users')
         .select('*')
         .eq('username', 'admin')
-        .single();
+        .maybeSingle();
 
       if (!existingAdmin) {
         // 创建管理员账户
@@ -96,7 +96,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         .select('*')
         .eq('username', username)
         .eq('password', password)
-        .single();
+        .maybeSingle();
 
       if (error || !userData) {
         console.error('登录失败:', error);
@@ -133,7 +133,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         .from('users')
         .select('username')
         .eq('username', username)
-        .single();
+        .maybeSingle();
 
       if (existingUser) {
         return { success: false, message: '用户名已存在' };
@@ -144,7 +144,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         .from('users')
         .select('email')
         .eq('email', email)
-        .single();
+        .maybeSingle();
 
       if (existingEmail) {
         return { success: false, message: '邮箱已被注册' };
