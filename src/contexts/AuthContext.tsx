@@ -52,42 +52,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       }
     }
 
-    // 确保管理员账户存在
-    ensureAdminExists();
     setLoading(false);
   }, []);
-
-  const ensureAdminExists = async () => {
-    try {
-      // 检查数据库中是否存在管理员
-      const { data: existingAdmin } = await supabase
-        .from('users')
-        .select('*')
-        .eq('username', 'admin')
-        .maybeSingle();
-
-      if (!existingAdmin) {
-        // 创建管理员账户
-        const { error } = await supabase
-          .from('users')
-          .insert({
-            username: 'admin',
-            email: 'admin@sgxy.edu.cn',
-            password: 'admin123', // 简单密码
-            role: 'admin',
-            is_blocked: false
-          });
-
-        if (error) {
-          console.error('创建管理员失败:', error);
-        } else {
-          console.log('管理员账户创建成功');
-        }
-      }
-    } catch (error) {
-      console.error('检查管理员账户失败:', error);
-    }
-  };
 
   const login = async (username: string, password: string): Promise<boolean> => {
     try {
