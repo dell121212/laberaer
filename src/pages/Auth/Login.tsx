@@ -100,7 +100,7 @@ const Login: React.FC = () => {
             )}
           </h3>
           <p className="text-sm text-blue-600 mt-2">
-            💡 {isLogin ? '管理员账户：admin / admin123' : '请填写真实信息注册'}
+            💡 {isLogin ? '🔑 管理员账户：admin / admin123' : '请填写真实信息注册'}
           </p>
         </div>
 
