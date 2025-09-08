@@ -6,15 +6,17 @@
 
 @layer base {
   * {
-    @apply border-pink-200;
+    @apply border-blue-200;
   }
   
   body {
-    @apply font-nunito text-gray-800 bg-gradient-to-br from-pink-50 via-purple-50 to-blue-50;
+    @apply font-nunito text-gray-800 bg-gradient-to-br from-blue-50 via-sky-50 to-cyan-50;
     -webkit-text-size-adjust: 100%;
     -ms-text-size-adjust: 100%;
     -webkit-overflow-scrolling: touch;
     min-height: 100vh;
+    position: relative;
+    overflow-x: hidden;
   }
   
   html {
@@ -25,26 +27,61 @@
 
 @layer components {
   .cute-card {
-    @apply bg-white/80 backdrop-blur-sm rounded-2xl shadow-lg border border-white/50 p-4 
-           hover:shadow-xl hover:scale-105 transition-all duration-300 hover:bg-white/90;
+    @apply bg-white/80 backdrop-blur-sm rounded-2xl shadow-lg border border-blue-100/50 p-4 
+           hover:shadow-xl hover:scale-105 transition-all duration-300 hover:bg-white/90
+           relative overflow-hidden;
+  }
+  
+  .cute-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(59, 130, 246, 0.1), transparent);
+    transition: left 0.5s;
+  }
+  
+  .cute-card:hover::before {
+    left: 100%;
   }
   
   .cute-input {
-    @apply w-full px-4 py-3 border-2 border-pink-200 rounded-xl 
-           focus:outline-none focus:ring-2 focus:ring-pink-400 focus:border-pink-400
+    @apply w-full px-4 py-3 border-2 border-blue-200 rounded-xl 
+           focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-blue-400
            text-gray-800 placeholder-gray-400 bg-white/80 backdrop-blur-sm
-           transition-all duration-300 hover:border-pink-300;
+           transition-all duration-300 hover:border-blue-300;
   }
   
   .cute-button {
-    @apply bg-gradient-to-r from-pink-400 to-purple-500 hover:from-pink-500 hover:to-purple-600 
+    @apply bg-gradient-to-r from-blue-400 to-cyan-500 hover:from-blue-500 hover:to-cyan-600 
            text-white px-6 py-3 rounded-xl font-medium transition-all duration-300 
-           shadow-lg hover:shadow-xl hover:scale-105 active:scale-95;
+           shadow-lg hover:shadow-xl hover:scale-105 active:scale-95
+           relative overflow-hidden;
+  }
+  
+  .cute-button::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    background: rgba(255, 255, 255, 0.3);
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+    transition: width 0.3s, height 0.3s;
+  }
+  
+  .cute-button:hover::before {
+    width: 300px;
+    height: 300px;
   }
   
   .cute-button-secondary {
     @apply bg-white/80 backdrop-blur-sm hover:bg-white text-gray-700 px-6 py-3 rounded-xl 
-           font-medium transition-all duration-300 border-2 border-gray-200 hover:border-pink-300
+           font-medium transition-all duration-300 border-2 border-blue-200 hover:border-blue-300
            shadow-md hover:shadow-lg hover:scale-105 active:scale-95;
   }
   
@@ -61,16 +98,54 @@
   }
   
   .gradient-text {
-    @apply bg-gradient-to-r from-pink-500 to-purple-600 bg-clip-text text-transparent;
+    @apply bg-gradient-to-r from-blue-500 to-cyan-600 bg-clip-text text-transparent;
   }
   
   .glass-effect {
-    @apply bg-white/20 backdrop-blur-md border border-white/30;
+    @apply bg-white/20 backdrop-blur-md border border-blue-200/30;
   }
   
   .cute-shadow {
-    box-shadow: 0 8px 32px rgba(255, 192, 203, 0.3);
+    box-shadow: 0 8px 32px rgba(59, 130, 246, 0.2);
   }
+  
+  .particle-bg {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: -1;
+  }
+  
+  .particle {
+    position: absolute;
+    background: radial-gradient(circle, rgba(59, 130, 246, 0.6) 0%, rgba(59, 130, 246, 0) 70%);
+    border-radius: 50%;
+    animation: particleFloat 8s infinite linear;
+  }
+  
+  .particle:nth-child(1) { width: 4px; height: 4px; left: 10%; animation-delay: 0s; }
+  .particle:nth-child(2) { width: 6px; height: 6px; left: 20%; animation-delay: 1s; }
+  .particle:nth-child(3) { width: 3px; height: 3px; left: 30%; animation-delay: 2s; }
+  .particle:nth-child(4) { width: 5px; height: 5px; left: 40%; animation-delay: 3s; }
+  .particle:nth-child(5) { width: 4px; height: 4px; left: 50%; animation-delay: 4s; }
+  .particle:nth-child(6) { width: 7px; height: 7px; left: 60%; animation-delay: 5s; }
+  .particle:nth-child(7) { width: 3px; height: 3px; left: 70%; animation-delay: 6s; }
+  .particle:nth-child(8) { width: 5px; height: 5px; left: 80%; animation-delay: 7s; }
+  .particle:nth-child(9) { width: 4px; height: 4px; left: 90%; animation-delay: 8s; }
+  .particle:nth-child(10) { width: 6px; height: 6px; left: 15%; animation-delay: 1.5s; }
+  .particle:nth-child(11) { width: 3px; height: 3px; left: 25%; animation-delay: 2.5s; }
+  .particle:nth-child(12) { width: 5px; height: 5px; left: 35%; animation-delay: 3.5s; }
+  .particle:nth-child(13) { width: 4px; height: 4px; left: 45%; animation-delay: 4.5s; }
+  .particle:nth-child(14) { width: 6px; height: 6px; left: 55%; animation-delay: 5.5s; }
+  .particle:nth-child(15) { width: 3px; height: 3px; left: 65%; animation-delay: 6.5s; }
+  .particle:nth-child(16) { width: 5px; height: 5px; left: 75%; animation-delay: 7.5s; }
+  .particle:nth-child(17) { width: 4px; height: 4px; left: 85%; animation-delay: 0.5s; }
+  .particle:nth-child(18) { width: 7px; height: 7px; left: 95%; animation-delay: 1.2s; }
+  .particle:nth-child(19) { width: 3px; height: 3px; left: 5%; animation-delay: 2.8s; }
+  .particle:nth-child(20) { width: 5px; height: 5px; left: 12%; animation-delay: 4.2s; }
 }
 
 /* 可爱的动画效果 */
@@ -108,9 +183,31 @@
   40% { transform: rotate(1deg); }
 }
 
-@keyframes rainbow {
-  0% { filter: hue-rotate(0deg); }
-  100% { filter: hue-rotate(360deg); }
+@keyframes particleFloat {
+  0% {
+    transform: translateY(100vh) rotate(0deg);
+    opacity: 0;
+  }
+  10% {
+    opacity: 1;
+  }
+  90% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(-100px) rotate(360deg);
+    opacity: 0;
+  }
+}
+
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+@keyframes glow {
+  0%, 100% { box-shadow: 0 0 20px rgba(59, 130, 246, 0.3); }
+  50% { box-shadow: 0 0 30px rgba(59, 130, 246, 0.5); }
 }
 
 .animate-pulse-cute {
@@ -121,8 +218,14 @@
   animation: wiggle 1s ease-in-out;
 }
 
-.animate-rainbow {
-  animation: rainbow 3s linear infinite;
+.animate-shimmer {
+  background: linear-gradient(90deg, transparent, rgba(59, 130, 246, 0.2), transparent);
+  background-size: 200% 100%;
+  animation: shimmer 2s infinite;
+}
+
+.animate-glow {
+  animation: glow 2s ease-in-out infinite;
 }
 
 /* 滚动条美化 */
@@ -131,20 +234,20 @@
 }
 
 ::-webkit-scrollbar-track {
-  @apply bg-pink-50 rounded-full;
+  @apply bg-blue-50 rounded-full;
 }
 
 ::-webkit-scrollbar-thumb {
-  @apply bg-gradient-to-b from-pink-300 to-purple-400 rounded-full;
+  @apply bg-gradient-to-b from-blue-300 to-cyan-400 rounded-full;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  @apply from-pink-400 to-purple-500;
+  @apply from-blue-400 to-cyan-500;
 }
 
 /* 选择文本的颜色 */
 ::selection {
-  @apply bg-pink-200 text-pink-800;
+  @apply bg-blue-200 text-blue-800;
 }
 
 /* 可爱的加载动画 */
@@ -177,7 +280,7 @@
 
 /* 渐变背景动画 */
 .animated-gradient {
-  background: linear-gradient(-45deg, #ff9a9e, #fecfef, #fecfef, #fad0c4);
+  background: linear-gradient(-45deg, #dbeafe, #e0f2fe, #f0f9ff, #ecfeff);
   background-size: 400% 400%;
   animation: gradientShift 15s ease infinite;
 }
@@ -191,11 +294,23 @@
 /* 可爱的按钮悬停效果 */
 .cute-hover:hover {
   transform: translateY(-2px) scale(1.02);
-  box-shadow: 0 10px 25px rgba(255, 192, 203, 0.4);
+  box-shadow: 0 10px 25px rgba(59, 130, 246, 0.3);
 }
 
 /* 卡片悬停效果 */
 .card-hover:hover {
   transform: translateY(-5px) rotate(1deg);
-  box-shadow: 0 15px 35px rgba(255, 192, 203, 0.3);
+  box-shadow: 0 15px 35px rgba(59, 130, 246, 0.2);
+}
+
+/* 光粒子容器 */
+.particles-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 0;
+  overflow: hidden;
 }

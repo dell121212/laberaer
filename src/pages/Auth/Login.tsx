@@ -49,28 +49,35 @@ const Login: React.FC = () => {
 
   return (
     <div className="min-h-screen animated-gradient flex items-center justify-center p-4 relative overflow-hidden">
-      {/* 可爱的背景装饰 */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-10 left-10 text-6xl emoji-bounce">🌸</div>
-        <div className="absolute top-20 right-20 text-4xl emoji-bounce" style={{animationDelay: '0.5s'}}>✨</div>
-        <div className="absolute bottom-20 left-20 text-5xl emoji-bounce" style={{animationDelay: '1s'}}>🦄</div>
-        <div className="absolute bottom-10 right-10 text-3xl emoji-bounce" style={{animationDelay: '1.5s'}}>💖</div>
-        <div className="absolute top-1/2 left-1/4 text-2xl emoji-bounce" style={{animationDelay: '2s'}}>🌈</div>
-        <div className="absolute top-1/3 right-1/3 text-4xl emoji-bounce" style={{animationDelay: '2.5s'}}>🎀</div>
+      {/* 光粒子背景 */}
+      <div className="particles-container">
+        {Array.from({ length: 20 }).map((_, i) => (
+          <div key={i} className="particle" />
+        ))}
       </div>
 
-      <div className="cute-card w-full max-w-md bounce-in cute-shadow">
+      {/* 可爱的背景装饰 */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute top-10 left-10 text-6xl emoji-bounce text-blue-400">💙</div>
+        <div className="absolute top-20 right-20 text-4xl emoji-bounce text-cyan-400" style={{animationDelay: '0.5s'}}>✨</div>
+        <div className="absolute bottom-20 left-20 text-5xl emoji-bounce text-sky-400" style={{animationDelay: '1s'}}>🌊</div>
+        <div className="absolute bottom-10 right-10 text-3xl emoji-bounce text-blue-500" style={{animationDelay: '1.5s'}}>💎</div>
+        <div className="absolute top-1/2 left-1/4 text-2xl emoji-bounce text-cyan-500" style={{animationDelay: '2s'}}>🌟</div>
+        <div className="absolute top-1/3 right-1/3 text-4xl emoji-bounce text-blue-300" style={{animationDelay: '2.5s'}}>🔮</div>
+      </div>
+
+      <div className="cute-card w-full max-w-md bounce-in cute-shadow animate-glow">
         {/* 头部 */}
         <div className="text-center mb-8">
           <div className="relative inline-block mb-4">
             <h1 className="text-3xl font-bold gradient-text flex items-center justify-center gap-2">
               🏫 韶关学院
-              <Heart className="text-pink-500 animate-pulse-cute" size={24} />
+              <Heart className="text-blue-500 animate-pulse-cute" size={24} />
             </h1>
           </div>
-          <h2 className="text-xl font-semibold text-purple-600 mb-2 flex items-center justify-center gap-2">
+          <h2 className="text-xl font-semibold text-blue-600 mb-2 flex items-center justify-center gap-2">
             🍄 食用菌创新团队
-            <Sparkles className="text-yellow-500 animate-wiggle" size={20} />
+            <Sparkles className="text-cyan-500 animate-wiggle" size={20} />
           </h2>
           <p className="text-sm text-gray-600 flex items-center justify-center gap-1">
             <span className="emoji-bounce">🔬</span> 科研创新 
@@ -177,7 +184,7 @@ const Login: React.FC = () => {
               setError('');
               setSuccess('');
             }}
-            className="text-purple-600 hover:text-purple-700 text-sm font-medium cute-hover inline-flex items-center gap-2"
+            className="text-blue-600 hover:text-blue-700 text-sm font-medium cute-hover inline-flex items-center gap-2"
           >
             {isLogin ? (
               <>
@@ -192,7 +199,7 @@ const Login: React.FC = () => {
         </div>
         
         {/* 底部信息 */}
-        <div className="mt-8 pt-6 border-t border-pink-200 text-center text-xs text-gray-500">
+        <div className="mt-8 pt-6 border-t border-blue-200 text-center text-xs text-gray-500">
           <p className="flex items-center justify-center gap-2">
             <span className="emoji-bounce">💻</span> 制作人：陈凯 
             <span className="emoji-bounce" style={{animationDelay: '0.5s'}}>👨‍🏫</span> 指导老师：刘主

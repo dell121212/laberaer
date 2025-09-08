@@ -26,7 +26,7 @@ const BottomNavigation: React.FC = () => {
   }
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 glass-effect backdrop-blur-lg border-t border-pink-200 z-40">
+    <div className="fixed bottom-0 left-0 right-0 glass-effect backdrop-blur-lg border-t border-blue-200 z-40">
       <div className="flex justify-around items-center py-2 px-2 max-w-md mx-auto">
         {navItems.map((item) => {
           const isActive = location.pathname === item.path;
@@ -40,8 +40,8 @@ const BottomNavigation: React.FC = () => {
                          transition-all duration-300 rounded-2xl min-h-[60px] relative overflow-hidden
                          cute-hover group
                          ${isActive 
-                           ? 'text-white bg-gradient-to-r from-pink-400 to-purple-500 font-semibold shadow-lg' 
-                           : 'text-gray-600 hover:text-pink-600 hover:bg-white/50'
+                           ? 'text-white bg-gradient-to-r from-blue-400 to-cyan-500 font-semibold shadow-lg' 
+                           : 'text-gray-600 hover:text-blue-600 hover:bg-white/50'
                          }`}
             >
               <div className="relative">
@@ -54,7 +54,7 @@ const BottomNavigation: React.FC = () => {
               </div>
               <span className="truncate max-w-[50px]">{item.label}</span>
               {isActive && (
-                <div className="absolute inset-0 bg-gradient-to-r from-pink-400 to-purple-500 opacity-20 rounded-2xl animate-pulse-cute" />
+                <div className="absolute inset-0 bg-gradient-to-r from-blue-400 to-cyan-500 opacity-20 rounded-2xl animate-pulse-cute" />
               )}
             </button>
           );
@@ -63,7 +63,7 @@ const BottomNavigation: React.FC = () => {
       
       {/* 可爱的底部装饰 */}
       <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 translate-y-1/2">
-        <Heart className="text-pink-400 animate-pulse-cute" size={12} />
+        <Heart className="text-blue-400 animate-pulse-cute" size={12} />
       </div>
     </div>
   );
